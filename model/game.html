@@ -1,0 +1,771 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+<meta name="generator" content="pdoc 0.9.2" />
+<title>chillow.model.game API documentation</title>
+<meta name="description" content="" />
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
+<link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
+<style>:root{--highlight-color:#fe9}.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}h1:target,h2:target,h3:target,h4:target,h5:target,h6:target{background:var(--highlight-color);padding:.2em 0}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}dt:target .name{background:var(--highlight-color)}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}td{padding:0 .5em}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/highlight.min.js" integrity="sha256-Uv3H6lx7dJmRfRvH8TH6kJD1TSK1aFcwgx+mdg3epi8=" crossorigin></script>
+<script>window.addEventListener('DOMContentLoaded', () => hljs.initHighlighting())</script>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>chillow.model.game</code></h1>
+</header>
+<section id="section-intro">
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">from dataclasses import dataclass, field
+from datetime import datetime, timedelta
+from typing import List, Optional
+from pathfinding.core.diagonal_movement import DiagonalMovement
+from pathfinding.core.grid import Grid
+from pathfinding.finder.best_first import BestFirst
+
+from chillow.model.player import Player
+from chillow.model.cell import Cell
+from chillow.exceptions import WrongGameWidthException, WrongGameHeightException, OwnPlayerMissingException, \
+    PlayerPositionException, PlayerWithGivenIdNotAvailableException
+
+
+@dataclass
+class Game:
+    &#34;&#34;&#34;This class holds all information needed to represent the current state of a game.
+
+    Attributes:
+        width: The number of horizontally adjacent cells.
+        height: The number of vertically adjacent cells.
+        cells:
+            A two-dimensional list of cells.
+            The first dimension is the row number (y axis), the second dimension represents the column (x axis).
+            The field [0][0] is in the upper left corner.
+        players: All players participating in this game.
+        you: The own player in this game. This player is also part of the players list.
+        running: This flag indicates whether the game is still running or is ended.
+        deadline:
+            The deadline by which all players have to perform their next action.
+            This field has no value, if the game is not running.
+    &#34;&#34;&#34;
+
+    width: int
+    height: int
+    cells: List[List[Cell]]
+    players: List[Player]
+    __you: int = field(repr=False)
+    you: Player = field(init=False)
+    running: bool
+    deadline: datetime = None
+
+    def __post_init__(self):
+        &#34;&#34;&#34;Performs checks after the game was created.
+
+        Raises:
+            WrongGameHeightException: Game height and height of cell array are not the same.
+            WrongGameWidthException: Game width and width of cell array are not the same.
+            PlayerPositionException: The current position of the player is not represented in the game.
+            OwnPlayerMissingException: No player representing the own player was found in the game.
+        &#34;&#34;&#34;
+        if len(self.cells) != self.height:
+            raise WrongGameHeightException(len(self.cells), self.height)
+
+        if len(self.cells[0]) != self.width:
+            raise WrongGameWidthException(len(self.cells[0]), self.width)
+
+        for player in self.players:
+            if player.id == self.__you:
+                self.you = player
+
+            if player.active \
+                    and (self.cells[player.y][player.x].players is None
+                         or player not in self.cells[player.y][player.x].players):
+                raise PlayerPositionException(player.x, player.y)
+
+        if not hasattr(self, &#39;you&#39;):
+            raise OwnPlayerMissingException()
+
+    def get_winner(self) -&gt; Optional[Player]:
+        &#34;&#34;&#34;Returns the winner of the game.
+
+        The winner is only determined if the game is not running anymore and there is an active player left in the
+        game. Otherwise an empty value is returned.
+
+        Returns:
+            The winner of the game if there is one. The return vale may be empty.
+        &#34;&#34;&#34;
+        if self.running:
+            raise Exception(&#34;Game not ended and has no winner yet&#34;)
+        for player in self.players:
+            if player.active:
+                return player
+        return None
+
+    def get_other_player_ids(self, p: Player, distance: int = 0, check_active: bool = False) -&gt; List[int]:
+        &#34;&#34;&#34;Returns all other players in the game reachable in given distance and based on their status.
+
+        Args:
+            p: The player who should be ignored.
+            distance: The distance in which other players should be found; 0 if distance should be ignored.
+            check_active: Flag to check whether only active players should be returned.
+
+        Returns:
+            List of ids matching the above criteria.
+        &#34;&#34;&#34;
+        players = []
+        for player in self.players:
+            if player.id != p.id \
+                    and (distance == 0 or (0 &lt; self.__measure_shortest_distance(player, p) &lt;= distance)) \
+                    and (not check_active or player.active):
+                players.append(player.id)
+        return players
+
+    def __measure_shortest_distance(self, player_a: Player, player_b: Player) -&gt; int:
+        matrix = self.translate_cell_matrix_to_pathfinding_matrix()
+        matrix[player_b.y][player_b.x] = 1  # target field must be empty
+        path_finder = BestFirst(diagonal_movement=DiagonalMovement.never)
+        grid = Grid(matrix=matrix)
+
+        path, _ = path_finder.find_path(grid.node(player_a.x, player_a.y), grid.node(player_b.x, player_b.y), grid)
+        return len(path) - 1  # Subtract 1 to not count the starting position
+
+    def translate_cell_matrix_to_pathfinding_matrix(self) -&gt; List[List[int]]:
+        &#34;&#34;&#34;Translates the two-dimensional cell array to an two-dimensional array usable for pathfinding.
+
+        Returns:
+            Two-dimensional array of integers, where an empty cell is represented by 1 and cells which were already
+            visited by a player are represented by 0.
+        &#34;&#34;&#34;
+        matrix = [[1 for _ in range(self.width)] for _ in range(self.height)]
+        for i in range(len(self.cells)):
+            for j in range(len(self.cells[i])):
+                if self.cells[i][j].players is not None and len(self.cells[i][j].players) &gt; 0:
+                    matrix[i][j] = 0  # Collision cell
+        return matrix
+
+    def get_player_by_id(self, player_id: int) -&gt; Player:
+        &#34;&#34;&#34;Identifies one player in the game by the ID.
+
+        Args:
+            player_id: The ID of the player.
+
+        Returns:
+            The player identified by the given ID.
+
+        Raises:
+             PlayerWithGivenIdNotAvailableException: Raised when no player with this ID is in this game.
+        &#34;&#34;&#34;
+        for player in self.players:
+            if player.id == player_id:
+                return player
+        raise PlayerWithGivenIdNotAvailableException(player_id)
+
+    def get_players_by_ids(self, player_ids: List[int]) -&gt; List[Player]:
+        &#34;&#34;&#34;Identifies multiple players in the game by their IDs.
+
+        Args:
+            player_ids: A list of IDs of the players.
+
+        Returns:
+            A list of players identified by the given IDs.
+        &#34;&#34;&#34;
+        players = []
+        for player in self.players:
+            if player.id in player_ids:
+                players.append(player)
+        return players
+
+    def copy(self):
+        &#34;&#34;&#34;Creates an exact same copy of this game but all objects point to different memory locations.
+
+        Returns:
+            A copy of the game.
+        &#34;&#34;&#34;
+        players: List[Player] = []
+        for player in self.players:
+            players.append(
+                Player(player.id, player.x, player.y, player.direction, player.speed, player.active, player.name))
+
+        cells: List[List[Cell]] = [[Cell() for _ in range(self.width)] for _ in range(self.height)]
+        for row in range(len(self.cells)):
+            for col in range(len(self.cells[row])):
+                if self.cells[row][col].players is not None:
+                    players_in_cell = []
+                    for player in self.cells[row][col].players:
+                        for copied_player in players:
+                            if copied_player.id == player.id:
+                                players_in_cell.append(copied_player)
+                    cells[row][col].players = players_in_cell
+
+        return Game(self.width, self.height, cells, players, self.you.id, self.running, self.deadline)
+
+    def normalize_deadline(self, server_time: datetime, own_time: datetime) -&gt; None:
+        &#34;&#34;&#34;Adjusts the deadline according to the difference between server and system time.
+
+        Args:
+            server_time: The current time of the game server.
+            own_time: The current time of the system where the program is executed.
+        &#34;&#34;&#34;
+        time_delta = own_time - server_time
+        multiplier = 1
+
+        if server_time &gt; own_time:
+            time_delta = server_time - own_time
+            multiplier = -1
+
+        microseconds_delta = int((time_delta.total_seconds() * 1000000))
+        self.deadline += multiplier * timedelta(microseconds=microseconds_delta)</code></pre>
+</details>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="chillow.model.game.Game"><code class="flex name class">
+<span>class <span class="ident">Game</span></span>
+<span>(</span><span>width: int, height: int, cells: List[List[<a title="chillow.model.cell.Cell" href="cell.html#chillow.model.cell.Cell">Cell</a>]], players: List[<a title="chillow.model.player.Player" href="player.html#chillow.model.player.Player">Player</a>], _Game__you: int, running: bool, deadline: datetime.datetime = None)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>This class holds all information needed to represent the current state of a game.</p>
+<h2 id="attributes">Attributes</h2>
+<dl>
+<dt><strong><code>width</code></strong></dt>
+<dd>The number of horizontally adjacent cells.</dd>
+<dt><strong><code>height</code></strong></dt>
+<dd>The number of vertically adjacent cells.</dd>
+<dt>cells:</dt>
+<dt>A two-dimensional list of cells.</dt>
+<dt>The first dimension is the row number (y axis), the second dimension represents the column (x axis).</dt>
+<dt>The field [0][0] is in the upper left corner.</dt>
+<dt><strong><code>players</code></strong></dt>
+<dd>All players participating in this game.</dd>
+<dt><strong><code>you</code></strong></dt>
+<dd>The own player in this game. This player is also part of the players list.</dd>
+<dt><strong><code>running</code></strong></dt>
+<dd>This flag indicates whether the game is still running or is ended.</dd>
+</dl>
+<p>deadline:
+The deadline by which all players have to perform their next action.
+This field has no value, if the game is not running.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@dataclass
+class Game:
+    &#34;&#34;&#34;This class holds all information needed to represent the current state of a game.
+
+    Attributes:
+        width: The number of horizontally adjacent cells.
+        height: The number of vertically adjacent cells.
+        cells:
+            A two-dimensional list of cells.
+            The first dimension is the row number (y axis), the second dimension represents the column (x axis).
+            The field [0][0] is in the upper left corner.
+        players: All players participating in this game.
+        you: The own player in this game. This player is also part of the players list.
+        running: This flag indicates whether the game is still running or is ended.
+        deadline:
+            The deadline by which all players have to perform their next action.
+            This field has no value, if the game is not running.
+    &#34;&#34;&#34;
+
+    width: int
+    height: int
+    cells: List[List[Cell]]
+    players: List[Player]
+    __you: int = field(repr=False)
+    you: Player = field(init=False)
+    running: bool
+    deadline: datetime = None
+
+    def __post_init__(self):
+        &#34;&#34;&#34;Performs checks after the game was created.
+
+        Raises:
+            WrongGameHeightException: Game height and height of cell array are not the same.
+            WrongGameWidthException: Game width and width of cell array are not the same.
+            PlayerPositionException: The current position of the player is not represented in the game.
+            OwnPlayerMissingException: No player representing the own player was found in the game.
+        &#34;&#34;&#34;
+        if len(self.cells) != self.height:
+            raise WrongGameHeightException(len(self.cells), self.height)
+
+        if len(self.cells[0]) != self.width:
+            raise WrongGameWidthException(len(self.cells[0]), self.width)
+
+        for player in self.players:
+            if player.id == self.__you:
+                self.you = player
+
+            if player.active \
+                    and (self.cells[player.y][player.x].players is None
+                         or player not in self.cells[player.y][player.x].players):
+                raise PlayerPositionException(player.x, player.y)
+
+        if not hasattr(self, &#39;you&#39;):
+            raise OwnPlayerMissingException()
+
+    def get_winner(self) -&gt; Optional[Player]:
+        &#34;&#34;&#34;Returns the winner of the game.
+
+        The winner is only determined if the game is not running anymore and there is an active player left in the
+        game. Otherwise an empty value is returned.
+
+        Returns:
+            The winner of the game if there is one. The return vale may be empty.
+        &#34;&#34;&#34;
+        if self.running:
+            raise Exception(&#34;Game not ended and has no winner yet&#34;)
+        for player in self.players:
+            if player.active:
+                return player
+        return None
+
+    def get_other_player_ids(self, p: Player, distance: int = 0, check_active: bool = False) -&gt; List[int]:
+        &#34;&#34;&#34;Returns all other players in the game reachable in given distance and based on their status.
+
+        Args:
+            p: The player who should be ignored.
+            distance: The distance in which other players should be found; 0 if distance should be ignored.
+            check_active: Flag to check whether only active players should be returned.
+
+        Returns:
+            List of ids matching the above criteria.
+        &#34;&#34;&#34;
+        players = []
+        for player in self.players:
+            if player.id != p.id \
+                    and (distance == 0 or (0 &lt; self.__measure_shortest_distance(player, p) &lt;= distance)) \
+                    and (not check_active or player.active):
+                players.append(player.id)
+        return players
+
+    def __measure_shortest_distance(self, player_a: Player, player_b: Player) -&gt; int:
+        matrix = self.translate_cell_matrix_to_pathfinding_matrix()
+        matrix[player_b.y][player_b.x] = 1  # target field must be empty
+        path_finder = BestFirst(diagonal_movement=DiagonalMovement.never)
+        grid = Grid(matrix=matrix)
+
+        path, _ = path_finder.find_path(grid.node(player_a.x, player_a.y), grid.node(player_b.x, player_b.y), grid)
+        return len(path) - 1  # Subtract 1 to not count the starting position
+
+    def translate_cell_matrix_to_pathfinding_matrix(self) -&gt; List[List[int]]:
+        &#34;&#34;&#34;Translates the two-dimensional cell array to an two-dimensional array usable for pathfinding.
+
+        Returns:
+            Two-dimensional array of integers, where an empty cell is represented by 1 and cells which were already
+            visited by a player are represented by 0.
+        &#34;&#34;&#34;
+        matrix = [[1 for _ in range(self.width)] for _ in range(self.height)]
+        for i in range(len(self.cells)):
+            for j in range(len(self.cells[i])):
+                if self.cells[i][j].players is not None and len(self.cells[i][j].players) &gt; 0:
+                    matrix[i][j] = 0  # Collision cell
+        return matrix
+
+    def get_player_by_id(self, player_id: int) -&gt; Player:
+        &#34;&#34;&#34;Identifies one player in the game by the ID.
+
+        Args:
+            player_id: The ID of the player.
+
+        Returns:
+            The player identified by the given ID.
+
+        Raises:
+             PlayerWithGivenIdNotAvailableException: Raised when no player with this ID is in this game.
+        &#34;&#34;&#34;
+        for player in self.players:
+            if player.id == player_id:
+                return player
+        raise PlayerWithGivenIdNotAvailableException(player_id)
+
+    def get_players_by_ids(self, player_ids: List[int]) -&gt; List[Player]:
+        &#34;&#34;&#34;Identifies multiple players in the game by their IDs.
+
+        Args:
+            player_ids: A list of IDs of the players.
+
+        Returns:
+            A list of players identified by the given IDs.
+        &#34;&#34;&#34;
+        players = []
+        for player in self.players:
+            if player.id in player_ids:
+                players.append(player)
+        return players
+
+    def copy(self):
+        &#34;&#34;&#34;Creates an exact same copy of this game but all objects point to different memory locations.
+
+        Returns:
+            A copy of the game.
+        &#34;&#34;&#34;
+        players: List[Player] = []
+        for player in self.players:
+            players.append(
+                Player(player.id, player.x, player.y, player.direction, player.speed, player.active, player.name))
+
+        cells: List[List[Cell]] = [[Cell() for _ in range(self.width)] for _ in range(self.height)]
+        for row in range(len(self.cells)):
+            for col in range(len(self.cells[row])):
+                if self.cells[row][col].players is not None:
+                    players_in_cell = []
+                    for player in self.cells[row][col].players:
+                        for copied_player in players:
+                            if copied_player.id == player.id:
+                                players_in_cell.append(copied_player)
+                    cells[row][col].players = players_in_cell
+
+        return Game(self.width, self.height, cells, players, self.you.id, self.running, self.deadline)
+
+    def normalize_deadline(self, server_time: datetime, own_time: datetime) -&gt; None:
+        &#34;&#34;&#34;Adjusts the deadline according to the difference between server and system time.
+
+        Args:
+            server_time: The current time of the game server.
+            own_time: The current time of the system where the program is executed.
+        &#34;&#34;&#34;
+        time_delta = own_time - server_time
+        multiplier = 1
+
+        if server_time &gt; own_time:
+            time_delta = server_time - own_time
+            multiplier = -1
+
+        microseconds_delta = int((time_delta.total_seconds() * 1000000))
+        self.deadline += multiplier * timedelta(microseconds=microseconds_delta)</code></pre>
+</details>
+<h3>Class variables</h3>
+<dl>
+<dt id="chillow.model.game.Game.cells"><code class="name">var <span class="ident">cells</span> : List[List[<a title="chillow.model.cell.Cell" href="cell.html#chillow.model.cell.Cell">Cell</a>]]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="chillow.model.game.Game.deadline"><code class="name">var <span class="ident">deadline</span> : datetime.datetime</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="chillow.model.game.Game.height"><code class="name">var <span class="ident">height</span> : int</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="chillow.model.game.Game.players"><code class="name">var <span class="ident">players</span> : List[<a title="chillow.model.player.Player" href="player.html#chillow.model.player.Player">Player</a>]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="chillow.model.game.Game.running"><code class="name">var <span class="ident">running</span> : bool</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="chillow.model.game.Game.width"><code class="name">var <span class="ident">width</span> : int</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="chillow.model.game.Game.you"><code class="name">var <span class="ident">you</span> : <a title="chillow.model.player.Player" href="player.html#chillow.model.player.Player">Player</a></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="chillow.model.game.Game.copy"><code class="name flex">
+<span>def <span class="ident">copy</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Creates an exact same copy of this game but all objects point to different memory locations.</p>
+<h2 id="returns">Returns</h2>
+<p>A copy of the game.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def copy(self):
+    &#34;&#34;&#34;Creates an exact same copy of this game but all objects point to different memory locations.
+
+    Returns:
+        A copy of the game.
+    &#34;&#34;&#34;
+    players: List[Player] = []
+    for player in self.players:
+        players.append(
+            Player(player.id, player.x, player.y, player.direction, player.speed, player.active, player.name))
+
+    cells: List[List[Cell]] = [[Cell() for _ in range(self.width)] for _ in range(self.height)]
+    for row in range(len(self.cells)):
+        for col in range(len(self.cells[row])):
+            if self.cells[row][col].players is not None:
+                players_in_cell = []
+                for player in self.cells[row][col].players:
+                    for copied_player in players:
+                        if copied_player.id == player.id:
+                            players_in_cell.append(copied_player)
+                cells[row][col].players = players_in_cell
+
+    return Game(self.width, self.height, cells, players, self.you.id, self.running, self.deadline)</code></pre>
+</details>
+</dd>
+<dt id="chillow.model.game.Game.get_other_player_ids"><code class="name flex">
+<span>def <span class="ident">get_other_player_ids</span></span>(<span>self, p: <a title="chillow.model.player.Player" href="player.html#chillow.model.player.Player">Player</a>, distance: int = 0, check_active: bool = False) ‑> List[int]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Returns all other players in the game reachable in given distance and based on their status.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>p</code></strong></dt>
+<dd>The player who should be ignored.</dd>
+<dt><strong><code>distance</code></strong></dt>
+<dd>The distance in which other players should be found; 0 if distance should be ignored.</dd>
+<dt><strong><code>check_active</code></strong></dt>
+<dd>Flag to check whether only active players should be returned.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>List of ids matching the above criteria.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_other_player_ids(self, p: Player, distance: int = 0, check_active: bool = False) -&gt; List[int]:
+    &#34;&#34;&#34;Returns all other players in the game reachable in given distance and based on their status.
+
+    Args:
+        p: The player who should be ignored.
+        distance: The distance in which other players should be found; 0 if distance should be ignored.
+        check_active: Flag to check whether only active players should be returned.
+
+    Returns:
+        List of ids matching the above criteria.
+    &#34;&#34;&#34;
+    players = []
+    for player in self.players:
+        if player.id != p.id \
+                and (distance == 0 or (0 &lt; self.__measure_shortest_distance(player, p) &lt;= distance)) \
+                and (not check_active or player.active):
+            players.append(player.id)
+    return players</code></pre>
+</details>
+</dd>
+<dt id="chillow.model.game.Game.get_player_by_id"><code class="name flex">
+<span>def <span class="ident">get_player_by_id</span></span>(<span>self, player_id: int) ‑> <a title="chillow.model.player.Player" href="player.html#chillow.model.player.Player">Player</a></span>
+</code></dt>
+<dd>
+<div class="desc"><p>Identifies one player in the game by the ID.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>player_id</code></strong></dt>
+<dd>The ID of the player.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>The player identified by the given ID.</p>
+<h2 id="raises">Raises</h2>
+<dl>
+<dt><code>PlayerWithGivenIdNotAvailableException</code></dt>
+<dd>Raised when no player with this ID is in this game.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_player_by_id(self, player_id: int) -&gt; Player:
+    &#34;&#34;&#34;Identifies one player in the game by the ID.
+
+    Args:
+        player_id: The ID of the player.
+
+    Returns:
+        The player identified by the given ID.
+
+    Raises:
+         PlayerWithGivenIdNotAvailableException: Raised when no player with this ID is in this game.
+    &#34;&#34;&#34;
+    for player in self.players:
+        if player.id == player_id:
+            return player
+    raise PlayerWithGivenIdNotAvailableException(player_id)</code></pre>
+</details>
+</dd>
+<dt id="chillow.model.game.Game.get_players_by_ids"><code class="name flex">
+<span>def <span class="ident">get_players_by_ids</span></span>(<span>self, player_ids: List[int]) ‑> List[<a title="chillow.model.player.Player" href="player.html#chillow.model.player.Player">Player</a>]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Identifies multiple players in the game by their IDs.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>player_ids</code></strong></dt>
+<dd>A list of IDs of the players.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>A list of players identified by the given IDs.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_players_by_ids(self, player_ids: List[int]) -&gt; List[Player]:
+    &#34;&#34;&#34;Identifies multiple players in the game by their IDs.
+
+    Args:
+        player_ids: A list of IDs of the players.
+
+    Returns:
+        A list of players identified by the given IDs.
+    &#34;&#34;&#34;
+    players = []
+    for player in self.players:
+        if player.id in player_ids:
+            players.append(player)
+    return players</code></pre>
+</details>
+</dd>
+<dt id="chillow.model.game.Game.get_winner"><code class="name flex">
+<span>def <span class="ident">get_winner</span></span>(<span>self) ‑> Optional[<a title="chillow.model.player.Player" href="player.html#chillow.model.player.Player">Player</a>]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Returns the winner of the game.</p>
+<p>The winner is only determined if the game is not running anymore and there is an active player left in the
+game. Otherwise an empty value is returned.</p>
+<h2 id="returns">Returns</h2>
+<p>The winner of the game if there is one. The return vale may be empty.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_winner(self) -&gt; Optional[Player]:
+    &#34;&#34;&#34;Returns the winner of the game.
+
+    The winner is only determined if the game is not running anymore and there is an active player left in the
+    game. Otherwise an empty value is returned.
+
+    Returns:
+        The winner of the game if there is one. The return vale may be empty.
+    &#34;&#34;&#34;
+    if self.running:
+        raise Exception(&#34;Game not ended and has no winner yet&#34;)
+    for player in self.players:
+        if player.active:
+            return player
+    return None</code></pre>
+</details>
+</dd>
+<dt id="chillow.model.game.Game.normalize_deadline"><code class="name flex">
+<span>def <span class="ident">normalize_deadline</span></span>(<span>self, server_time: datetime.datetime, own_time: datetime.datetime) ‑> NoneType</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Adjusts the deadline according to the difference between server and system time.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>server_time</code></strong></dt>
+<dd>The current time of the game server.</dd>
+<dt><strong><code>own_time</code></strong></dt>
+<dd>The current time of the system where the program is executed.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def normalize_deadline(self, server_time: datetime, own_time: datetime) -&gt; None:
+    &#34;&#34;&#34;Adjusts the deadline according to the difference between server and system time.
+
+    Args:
+        server_time: The current time of the game server.
+        own_time: The current time of the system where the program is executed.
+    &#34;&#34;&#34;
+    time_delta = own_time - server_time
+    multiplier = 1
+
+    if server_time &gt; own_time:
+        time_delta = server_time - own_time
+        multiplier = -1
+
+    microseconds_delta = int((time_delta.total_seconds() * 1000000))
+    self.deadline += multiplier * timedelta(microseconds=microseconds_delta)</code></pre>
+</details>
+</dd>
+<dt id="chillow.model.game.Game.translate_cell_matrix_to_pathfinding_matrix"><code class="name flex">
+<span>def <span class="ident">translate_cell_matrix_to_pathfinding_matrix</span></span>(<span>self) ‑> List[List[int]]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Translates the two-dimensional cell array to an two-dimensional array usable for pathfinding.</p>
+<h2 id="returns">Returns</h2>
+<p>Two-dimensional array of integers, where an empty cell is represented by 1 and cells which were already
+visited by a player are represented by 0.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def translate_cell_matrix_to_pathfinding_matrix(self) -&gt; List[List[int]]:
+    &#34;&#34;&#34;Translates the two-dimensional cell array to an two-dimensional array usable for pathfinding.
+
+    Returns:
+        Two-dimensional array of integers, where an empty cell is represented by 1 and cells which were already
+        visited by a player are represented by 0.
+    &#34;&#34;&#34;
+    matrix = [[1 for _ in range(self.width)] for _ in range(self.height)]
+    for i in range(len(self.cells)):
+        for j in range(len(self.cells[i])):
+            if self.cells[i][j].players is not None and len(self.cells[i][j].players) &gt; 0:
+                matrix[i][j] = 0  # Collision cell
+    return matrix</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="chillow.model" href="index.html">chillow.model</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="chillow.model.game.Game" href="#chillow.model.game.Game">Game</a></code></h4>
+<ul class="">
+<li><code><a title="chillow.model.game.Game.cells" href="#chillow.model.game.Game.cells">cells</a></code></li>
+<li><code><a title="chillow.model.game.Game.copy" href="#chillow.model.game.Game.copy">copy</a></code></li>
+<li><code><a title="chillow.model.game.Game.deadline" href="#chillow.model.game.Game.deadline">deadline</a></code></li>
+<li><code><a title="chillow.model.game.Game.get_other_player_ids" href="#chillow.model.game.Game.get_other_player_ids">get_other_player_ids</a></code></li>
+<li><code><a title="chillow.model.game.Game.get_player_by_id" href="#chillow.model.game.Game.get_player_by_id">get_player_by_id</a></code></li>
+<li><code><a title="chillow.model.game.Game.get_players_by_ids" href="#chillow.model.game.Game.get_players_by_ids">get_players_by_ids</a></code></li>
+<li><code><a title="chillow.model.game.Game.get_winner" href="#chillow.model.game.Game.get_winner">get_winner</a></code></li>
+<li><code><a title="chillow.model.game.Game.height" href="#chillow.model.game.Game.height">height</a></code></li>
+<li><code><a title="chillow.model.game.Game.normalize_deadline" href="#chillow.model.game.Game.normalize_deadline">normalize_deadline</a></code></li>
+<li><code><a title="chillow.model.game.Game.players" href="#chillow.model.game.Game.players">players</a></code></li>
+<li><code><a title="chillow.model.game.Game.running" href="#chillow.model.game.Game.running">running</a></code></li>
+<li><code><a title="chillow.model.game.Game.translate_cell_matrix_to_pathfinding_matrix" href="#chillow.model.game.Game.translate_cell_matrix_to_pathfinding_matrix">translate_cell_matrix_to_pathfinding_matrix</a></code></li>
+<li><code><a title="chillow.model.game.Game.width" href="#chillow.model.game.Game.width">width</a></code></li>
+<li><code><a title="chillow.model.game.Game.you" href="#chillow.model.game.Game.you">you</a></code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.9.2</a>.</p>
+</footer>
+</body>
+</html>
