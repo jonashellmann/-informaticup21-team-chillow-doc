@@ -43,6 +43,7 @@ from chillow.service.game_service import GameService
 
 
 class AIOptions(Enum):
+    &#34;&#34;&#34;Enumeration that holds possible options for the AIs.&#34;&#34;&#34;
     max_distance = range(1)
 
 
@@ -76,7 +77,8 @@ class NotKillingItselfAI(ArtificialIntelligence):
 
     def get_information(self) -&gt; str:
         &#34;&#34;&#34;See base class.&#34;&#34;&#34;
-        return super().get_information() + &#34;, max_worse_distance=&#34; + str(self.__max_worse_distance)
+        return (super().get_information() + &#34;, max_worse_distance=&#34; + str(self.__max_worse_distance)
+                + &#34;, depth=&#34; + str(self.__depth))
 
     def create_next_action(self, game: Game, return_value: Value):
         &#34;&#34;&#34;See base class.&#34;&#34;&#34;
@@ -138,7 +140,7 @@ class NotKillingItselfAI(ArtificialIntelligence):
                     best_actions = updated_best_actions
                 elif straight_distance &gt;= max_straight_distance - self.__max_worse_distance:  # still good option
                     best_actions[action] = straight_distance
-            except Exception as ex:
+            except InvalidPlayerMoveException as ex:
                 logging.warning(ex)
                 continue
 
@@ -209,12 +211,13 @@ class NotKillingItselfAI(ArtificialIntelligence):
 <span>(</span><span>value, names=None, *, module=None, qualname=None, type=None, start=1)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>An enumeration.</p></div>
+<div class="desc"><p>Enumeration that holds possible options for the AIs.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class AIOptions(Enum):
+    &#34;&#34;&#34;Enumeration that holds possible options for the AIs.&#34;&#34;&#34;
     max_distance = range(1)</code></pre>
 </details>
 <h3>Ancestors</h3>
@@ -290,7 +293,8 @@ class NotKillingItselfAI(ArtificialIntelligence):
 
     def get_information(self) -&gt; str:
         &#34;&#34;&#34;See base class.&#34;&#34;&#34;
-        return super().get_information() + &#34;, max_worse_distance=&#34; + str(self.__max_worse_distance)
+        return (super().get_information() + &#34;, max_worse_distance=&#34; + str(self.__max_worse_distance)
+                + &#34;, depth=&#34; + str(self.__depth))
 
     def create_next_action(self, game: Game, return_value: Value):
         &#34;&#34;&#34;See base class.&#34;&#34;&#34;
@@ -352,7 +356,7 @@ class NotKillingItselfAI(ArtificialIntelligence):
                     best_actions = updated_best_actions
                 elif straight_distance &gt;= max_straight_distance - self.__max_worse_distance:  # still good option
                     best_actions[action] = straight_distance
-            except Exception as ex:
+            except InvalidPlayerMoveException as ex:
                 logging.warning(ex)
                 continue
 
@@ -479,7 +483,7 @@ while running straight after the action has been executed.</p>
                 best_actions = updated_best_actions
             elif straight_distance &gt;= max_straight_distance - self.__max_worse_distance:  # still good option
                 best_actions[action] = straight_distance
-        except Exception as ex:
+        except InvalidPlayerMoveException as ex:
             logging.warning(ex)
             continue
 
@@ -487,7 +491,7 @@ while running straight after the action has been executed.</p>
 </details>
 </dd>
 <dt id="chillow.service.ai.not_killing_itself_ai.NotKillingItselfAI.create_next_action"><code class="name flex">
-<span>def <span class="ident">create_next_action</span></span>(<span>self, game: <a title="chillow.model.game.Game" href="../../model/game.html#chillow.model.game.Game">Game</a>, return_value: <bound method BaseContext.Value of <multiprocessing.context.DefaultContext object at 0x000002A5E11DC490>>)</span>
+<span>def <span class="ident">create_next_action</span></span>(<span>self, game: <a title="chillow.model.game.Game" href="../../model/game.html#chillow.model.game.Game">Game</a>, return_value: <bound method BaseContext.Value of <multiprocessing.context.DefaultContext object at 0x000001CE7FAF3C70>>)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>See base class.</p></div>
@@ -612,7 +616,8 @@ The number of pre-calculated player moves is reduced until surviving actions are
 </summary>
 <pre><code class="python">def get_information(self) -&gt; str:
     &#34;&#34;&#34;See base class.&#34;&#34;&#34;
-    return super().get_information() + &#34;, max_worse_distance=&#34; + str(self.__max_worse_distance)</code></pre>
+    return (super().get_information() + &#34;, max_worse_distance=&#34; + str(self.__max_worse_distance)
+            + &#34;, depth=&#34; + str(self.__depth))</code></pre>
 </details>
 </dd>
 </dl>

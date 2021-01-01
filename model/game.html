@@ -124,8 +124,8 @@ class Game:
         players = []
         for player in self.players:
             if player.id != p.id \
-                    and (distance == 0 or (0 &lt; self.__measure_shortest_distance(player, p) &lt;= distance)) \
-                    and (not check_active or player.active):
+                    and (not check_active or player.active) \
+                    and (distance == 0 or (0 &lt; self.__measure_shortest_distance(player, p) &lt;= distance)):
                 players.append(player.id)
         return players
 
@@ -350,8 +350,8 @@ class Game:
         players = []
         for player in self.players:
             if player.id != p.id \
-                    and (distance == 0 or (0 &lt; self.__measure_shortest_distance(player, p) &lt;= distance)) \
-                    and (not check_active or player.active):
+                    and (not check_active or player.active) \
+                    and (distance == 0 or (0 &lt; self.__measure_shortest_distance(player, p) &lt;= distance)):
                 players.append(player.id)
         return players
 
@@ -554,8 +554,8 @@ class Game:
     players = []
     for player in self.players:
         if player.id != p.id \
-                and (distance == 0 or (0 &lt; self.__measure_shortest_distance(player, p) &lt;= distance)) \
-                and (not check_active or player.active):
+                and (not check_active or player.active) \
+                and (distance == 0 or (0 &lt; self.__measure_shortest_distance(player, p) &lt;= distance)):
             players.append(player.id)
     return players</code></pre>
 </details>

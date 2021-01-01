@@ -48,7 +48,6 @@ class Controller(metaclass=ABCMeta):
     @abstractmethod
     def play(self):
         &#34;&#34;&#34;Executes the logic to play a game and show the state in an UI.&#34;&#34;&#34;
-        pass
 
     @staticmethod
     def call_ai(ai: ArtificialIntelligence, game: Game, return_value: multiprocessing.Value):
@@ -94,7 +93,6 @@ class Controller(metaclass=ABCMeta):
     @abstractmethod
     def play(self):
         &#34;&#34;&#34;Executes the logic to play a game and show the state in an UI.&#34;&#34;&#34;
-        pass
 
     @staticmethod
     def call_ai(ai: ArtificialIntelligence, game: Game, return_value: multiprocessing.Value):
@@ -108,7 +106,7 @@ class Controller(metaclass=ABCMeta):
 <h3>Static methods</h3>
 <dl>
 <dt id="chillow.controller.controller.Controller.call_ai"><code class="name flex">
-<span>def <span class="ident">call_ai</span></span>(<span>ai: <a title="chillow.service.ai.artificial_intelligence.ArtificialIntelligence" href="../service/ai/artificial_intelligence.html#chillow.service.ai.artificial_intelligence.ArtificialIntelligence">ArtificialIntelligence</a>, game: <a title="chillow.model.game.Game" href="../model/game.html#chillow.model.game.Game">Game</a>, return_value: <bound method BaseContext.Value of <multiprocessing.context.DefaultContext object at 0x000002A5E11DC490>>)</span>
+<span>def <span class="ident">call_ai</span></span>(<span>ai: <a title="chillow.service.ai.artificial_intelligence.ArtificialIntelligence" href="../service/ai/artificial_intelligence.html#chillow.service.ai.artificial_intelligence.ArtificialIntelligence">ArtificialIntelligence</a>, game: <a title="chillow.model.game.Game" href="../model/game.html#chillow.model.game.Game">Game</a>, return_value: <bound method BaseContext.Value of <multiprocessing.context.DefaultContext object at 0x000001CE7FAF3C70>>)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -135,8 +133,7 @@ def call_ai(ai: ArtificialIntelligence, game: Game, return_value: multiprocessin
 </summary>
 <pre><code class="python">@abstractmethod
 def play(self):
-    &#34;&#34;&#34;Executes the logic to play a game and show the state in an UI.&#34;&#34;&#34;
-    pass</code></pre>
+    &#34;&#34;&#34;Executes the logic to play a game and show the state in an UI.&#34;&#34;&#34;</code></pre>
 </details>
 </dd>
 </dl>

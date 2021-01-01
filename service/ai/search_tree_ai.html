@@ -67,10 +67,10 @@ class SearchTreeAI(ArtificialIntelligence):
 
     def get_information(self) -&gt; str:
         &#34;&#34;&#34;See base class.&#34;&#34;&#34;
-        return super().get_information() \
-               + &#34;, depth=&#34; + str(self.__depth) \
-               + &#34;, randomize=&#34; + str(self.__randomize) \
-               + &#34;, distance_to_check=&#34; + str(self.__distance_to_check)
+        return (super().get_information() +
+                &#34;, depth=&#34; + str(self.__depth) +
+                &#34;, randomize=&#34; + str(self.__randomize) +
+                &#34;, distance_to_check=&#34; + str(self.__distance_to_check))
 
     def create_next_action(self, game: Game, return_value: Value):
         &#34;&#34;&#34;See base class.&#34;&#34;&#34;
@@ -186,10 +186,10 @@ account in the calculations.</p></div>
 
     def get_information(self) -&gt; str:
         &#34;&#34;&#34;See base class.&#34;&#34;&#34;
-        return super().get_information() \
-               + &#34;, depth=&#34; + str(self.__depth) \
-               + &#34;, randomize=&#34; + str(self.__randomize) \
-               + &#34;, distance_to_check=&#34; + str(self.__distance_to_check)
+        return (super().get_information() +
+                &#34;, depth=&#34; + str(self.__depth) +
+                &#34;, randomize=&#34; + str(self.__randomize) +
+                &#34;, distance_to_check=&#34; + str(self.__distance_to_check))
 
     def create_next_action(self, game: Game, return_value: Value):
         &#34;&#34;&#34;See base class.&#34;&#34;&#34;
@@ -284,7 +284,7 @@ account in the calculations.</p></div>
 </details>
 </dd>
 <dt id="chillow.service.ai.search_tree_ai.SearchTreeAI.create_next_action"><code class="name flex">
-<span>def <span class="ident">create_next_action</span></span>(<span>self, game: <a title="chillow.model.game.Game" href="../../model/game.html#chillow.model.game.Game">Game</a>, return_value: <bound method BaseContext.Value of <multiprocessing.context.DefaultContext object at 0x000002A5E11DC490>>)</span>
+<span>def <span class="ident">create_next_action</span></span>(<span>self, game: <a title="chillow.model.game.Game" href="../../model/game.html#chillow.model.game.Game">Game</a>, return_value: <bound method BaseContext.Value of <multiprocessing.context.DefaultContext object at 0x000001CE7FAF3C70>>)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>See base class.</p></div>
@@ -316,10 +316,10 @@ account in the calculations.</p></div>
 </summary>
 <pre><code class="python">def get_information(self) -&gt; str:
     &#34;&#34;&#34;See base class.&#34;&#34;&#34;
-    return super().get_information() \
-           + &#34;, depth=&#34; + str(self.__depth) \
-           + &#34;, randomize=&#34; + str(self.__randomize) \
-           + &#34;, distance_to_check=&#34; + str(self.__distance_to_check)</code></pre>
+    return (super().get_information() +
+            &#34;, depth=&#34; + str(self.__depth) +
+            &#34;, randomize=&#34; + str(self.__randomize) +
+            &#34;, distance_to_check=&#34; + str(self.__distance_to_check))</code></pre>
 </details>
 </dd>
 </dl>

@@ -61,7 +61,7 @@ class ConsoleView(View):
                     row_cells.append(&#39; &#39;)
                 else:
                     player = game.get_player_by_id(cell.get_player_id())
-                    color = self._player_colors[cell.get_player_id()]
+                    color = self._player_colors[self.__player_representation[cell.get_player_id()]]
                     if player.x == col and player.y == row:
                         if player == game.you:
                             row_cells.append(colored(&#34;x&#34;, color))
@@ -164,7 +164,7 @@ class ConsoleView(View):
                     row_cells.append(&#39; &#39;)
                 else:
                     player = game.get_player_by_id(cell.get_player_id())
-                    color = self._player_colors[cell.get_player_id()]
+                    color = self._player_colors[self.__player_representation[cell.get_player_id()]]
                     if player.x == col and player.y == row:
                         if player == game.you:
                             row_cells.append(colored(&#34;x&#34;, color))
@@ -311,7 +311,7 @@ def get_input(text: str):
                 row_cells.append(&#39; &#39;)
             else:
                 player = game.get_player_by_id(cell.get_player_id())
-                color = self._player_colors[cell.get_player_id()]
+                color = self._player_colors[self.__player_representation[cell.get_player_id()]]
                 if player.x == col and player.y == row:
                     if player == game.you:
                         row_cells.append(colored(&#34;x&#34;, color))

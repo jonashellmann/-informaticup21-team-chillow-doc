@@ -31,7 +31,10 @@ from chillow.service.ai.pathfinding_ai import PathfindingAI
 from chillow.service.ai.pathfinding_search_tree_ai import PathfindingSearchTreeAI
 from chillow.service.ai.random_ai import RandomAI, RandomWaitingAI
 from chillow.service.ai.search_tree_ai import SearchTreeAI
-from chillow.service.ai.search_tree_pathfinding_ai import SearchTreePathfindingAI</code></pre>
+from chillow.service.ai.search_tree_pathfinding_ai import SearchTreePathfindingAI
+
+__all__ = [&#39;NotKillingItselfAI&#39;, &#39;AIOptions&#39;, &#39;PathfindingAI&#39;, &#39;PathfindingSearchTreeAI&#39;, &#39;RandomAI&#39;,
+           &#39;RandomWaitingAI&#39;, &#39;SearchTreeAI&#39;, &#39;SearchTreePathfindingAI&#39;]</code></pre>
 </details>
 </section>
 <section>
@@ -76,6 +79,1404 @@ from chillow.service.ai.search_tree_pathfinding_ai import SearchTreePathfindingA
 <section>
 </section>
 <section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="chillow.service.ai.AIOptions"><code class="flex name class">
+<span>class <span class="ident">AIOptions</span></span>
+<span>(</span><span>value, names=None, *, module=None, qualname=None, type=None, start=1)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Enumeration that holds possible options for the AIs.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class AIOptions(Enum):
+    &#34;&#34;&#34;Enumeration that holds possible options for the AIs.&#34;&#34;&#34;
+    max_distance = range(1)</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>enum.Enum</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="chillow.service.ai.AIOptions.max_distance"><code class="name">var <span class="ident">max_distance</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+</dd>
+<dt id="chillow.service.ai.NotKillingItselfAI"><code class="flex name class">
+<span>class <span class="ident">NotKillingItselfAI</span></span>
+<span>(</span><span>player: <a title="chillow.model.player.Player" href="../../model/player.html#chillow.model.player.Player">Player</a>, options: List[<a title="chillow.service.ai.not_killing_itself_ai.AIOptions" href="not_killing_itself_ai.html#chillow.service.ai.not_killing_itself_ai.AIOptions">AIOptions</a>], max_speed: int, max_worse_distance: int, depth: int)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>AI implementation to choose an action that simply does not kill the player for the next rounds.</p>
+<p>It does not consider the opponent's player actions.</p>
+<h2 id="attributes">Attributes</h2>
+<dl>
+<dt><strong><code>player</code></strong></dt>
+<dd>The player associated with this AI.</dd>
+</dl>
+<p>Creates a new object of the NotKillingItselfAI.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>player</code></strong></dt>
+<dd>The player assigned to the AI.</dd>
+<dt><strong><code>options</code></strong></dt>
+<dd>List of possible options to change the behavior of the AI.</dd>
+<dt><strong><code>max_speed</code></strong></dt>
+<dd>The maximum speed the AI can reach.</dd>
+<dt><strong><code>max_worse_distance</code></strong></dt>
+<dd>A tolerance, whereby more than just the best action is calculated. Actions which are</dd>
+<dt>worse, but within this tolerance, are also considered.</dt>
+<dt><strong><code>depth</code></strong></dt>
+<dd>Number of player actions that are looked into the future.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class NotKillingItselfAI(ArtificialIntelligence):
+    &#34;&#34;&#34;AI implementation to choose an action that simply does not kill the player for the next rounds.
+
+    It does not consider the opponent&#39;s player actions.
+
+    Attributes:
+        player: The player associated with this AI.
+    &#34;&#34;&#34;
+
+    def __init__(self, player: Player, options: List[AIOptions], max_speed: int, max_worse_distance: int,
+                 depth: int):
+        &#34;&#34;&#34;Creates a new object of the NotKillingItselfAI.
+
+        Args:
+            player: The player assigned to the AI.
+            options: List of possible options to change the behavior of the AI.
+            max_speed: The maximum speed the AI can reach.
+            max_worse_distance: A tolerance, whereby more than just the best action is calculated. Actions which are
+            worse, but within this tolerance, are also considered.
+            depth: Number of player actions that are looked into the future.
+        &#34;&#34;&#34;
+        super().__init__(player, max_speed)
+        self.__options = options
+        self.__max_worse_distance = max_worse_distance
+
+        assert depth &gt; 0, &#34;depth must be greater than 0&#34;
+        self.__depth = depth
+
+    def get_information(self) -&gt; str:
+        &#34;&#34;&#34;See base class.&#34;&#34;&#34;
+        return (super().get_information() + &#34;, max_worse_distance=&#34; + str(self.__max_worse_distance)
+                + &#34;, depth=&#34; + str(self.__depth))
+
+    def create_next_action(self, game: Game, return_value: Value):
+        &#34;&#34;&#34;See base class.&#34;&#34;&#34;
+        self._turn_ctr += 1
+
+        game_service = GameService(game)
+        game_service.turn.turn_ctr = self._turn_ctr
+
+        surviving_actions = self.find_surviving_actions_with_best_depth(game_service)
+        if AIOptions.max_distance in self.__options:
+            max_distance_actions = self.calc_action_with_max_distance_to_visited_cells(game_service, surviving_actions)
+            action = choice(max_distance_actions) if max_distance_actions is not None and len(
+                max_distance_actions) &gt; 0 else Action.change_nothing
+        else:
+            action = choice(surviving_actions) if surviving_actions is not None and len(
+                surviving_actions) &gt; 0 else Action.change_nothing
+
+        return_value.value = action.get_index()
+
+    def calc_action_with_max_distance_to_visited_cells(self, game_service: GameService,
+                                                       actions: List[Action]) -&gt; List[Action]:
+        &#34;&#34;&#34;Calculates a list of actions that have the property to have as many free cells as possible in front of them
+        while running straight after the action has been executed.
+
+        Args:
+            game_service: The game service used for simulation of actions.
+            actions: The actions to be checked
+
+        Returns:
+            List of best actions with the property having as many free cells as possible in front of the player.
+        &#34;&#34;&#34;
+        max_straight_distance = 0
+        best_actions: Dict[Action, int] = {}
+        for action in actions:
+            gs_copy = copy.deepcopy(game_service)
+            try:
+                player = gs_copy.game.get_player_by_id(self.player.id)
+                gs_copy.visited_cells_by_player[player.id] = gs_copy.get_and_visit_cells(player, action)
+
+                straight_distance = 0
+                horizontal_multiplier, vertical_multiplier = GameService.get_horizontal_and_vertical_multiplier(player)
+
+                for i in range(max(gs_copy.game.height, gs_copy.game.width)):
+                    x = player.x + (i + 1) * horizontal_multiplier
+                    y = player.y + (i + 1) * vertical_multiplier
+                    if x in range(gs_copy.game.width) and y in range(gs_copy.game.height) and (
+                            gs_copy.game.cells[y][x].players is None or len(gs_copy.game.cells[y][x].players) == 0):
+                        straight_distance += 1
+                    else:
+                        break
+
+                if len(best_actions) == 0 or straight_distance &gt; max_straight_distance:
+                    max_straight_distance = straight_distance
+                    best_actions[action] = straight_distance
+                    updated_best_actions: Dict[Action, int] = {}
+                    for (act, dist) in best_actions.items():  # new max_straight_distance. Remove worth options
+                        if dist &gt;= max_straight_distance - self.__max_worse_distance:
+                            updated_best_actions[act] = dist
+                    best_actions = updated_best_actions
+                elif straight_distance &gt;= max_straight_distance - self.__max_worse_distance:  # still good option
+                    best_actions[action] = straight_distance
+            except InvalidPlayerMoveException as ex:
+                logging.warning(ex)
+                continue
+
+        return list(best_actions.keys())
+
+    def find_surviving_actions(self, game_service: GameService, depth: int) -&gt; List[Action]:
+        &#34;&#34;&#34;Finds all actions that will let the player survive for the next rounds.
+
+        Args:
+            game_service: The game service used for simulation of actions.
+            depth: The number of rounds the player should survive at least.
+
+        Returns:
+            Actions that will not kill the player in the next rounds.
+        &#34;&#34;&#34;
+        result: List[Action] = []
+        for action in Action:
+            gs_copy = pickle.loads(pickle.dumps(game_service))
+            try:
+                player = gs_copy.game.get_player_by_id(self.player.id)
+                if player.speed == self._max_speed and action == Action.speed_up:
+                    continue
+                gs_copy.visited_cells_by_player[player.id] = gs_copy.get_and_visit_cells(player, action)
+            except InvalidPlayerMoveException:
+                continue
+            gs_copy.check_and_set_died_players()
+            if player.active:
+                interim_result = []
+                if depth &gt; 1:
+                    # recursive call to look further into the future
+                    interim_result = self.find_surviving_actions(gs_copy, depth - 1)
+
+                if len(interim_result) &gt; 0 or depth == 1:
+                    result += [action]
+
+        return result
+
+    def find_surviving_actions_with_best_depth(self, game_service: GameService) -&gt; List[Action]:
+        &#34;&#34;&#34;Finds all actions that won&#39;t kill the player in the next rounds.
+        The number of pre-calculated player moves is reduced until surviving actions are found.
+
+        Args:
+            game_service: The game service used for simulation of actions.
+
+        Returns:
+            Actions that will not kill the player in the next rounds.
+        &#34;&#34;&#34;
+        result: List[Action] = []
+        for current_depth in reversed(range(1, self.__depth + 1)):
+            result = self.find_surviving_actions(game_service, current_depth)
+            if len(result) &gt; 0:
+                break
+
+        return result</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="chillow.service.ai.artificial_intelligence.ArtificialIntelligence" href="artificial_intelligence.html#chillow.service.ai.artificial_intelligence.ArtificialIntelligence">ArtificialIntelligence</a></li>
+</ul>
+<h3>Subclasses</h3>
+<ul class="hlist">
+<li><a title="chillow.service.ai.pathfinding_ai.PathfindingAI" href="pathfinding_ai.html#chillow.service.ai.pathfinding_ai.PathfindingAI">PathfindingAI</a></li>
+</ul>
+<h3>Methods</h3>
+<dl>
+<dt id="chillow.service.ai.NotKillingItselfAI.calc_action_with_max_distance_to_visited_cells"><code class="name flex">
+<span>def <span class="ident">calc_action_with_max_distance_to_visited_cells</span></span>(<span>self, game_service: <a title="chillow.service.game_service.GameService" href="../game_service.html#chillow.service.game_service.GameService">GameService</a>, actions: List[<a title="chillow.model.action.Action" href="../../model/action.html#chillow.model.action.Action">Action</a>]) ‑> List[<a title="chillow.model.action.Action" href="../../model/action.html#chillow.model.action.Action">Action</a>]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Calculates a list of actions that have the property to have as many free cells as possible in front of them
+while running straight after the action has been executed.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>game_service</code></strong></dt>
+<dd>The game service used for simulation of actions.</dd>
+<dt><strong><code>actions</code></strong></dt>
+<dd>The actions to be checked</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>List of best actions with the property having as many free cells as possible in front of the player.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def calc_action_with_max_distance_to_visited_cells(self, game_service: GameService,
+                                                   actions: List[Action]) -&gt; List[Action]:
+    &#34;&#34;&#34;Calculates a list of actions that have the property to have as many free cells as possible in front of them
+    while running straight after the action has been executed.
+
+    Args:
+        game_service: The game service used for simulation of actions.
+        actions: The actions to be checked
+
+    Returns:
+        List of best actions with the property having as many free cells as possible in front of the player.
+    &#34;&#34;&#34;
+    max_straight_distance = 0
+    best_actions: Dict[Action, int] = {}
+    for action in actions:
+        gs_copy = copy.deepcopy(game_service)
+        try:
+            player = gs_copy.game.get_player_by_id(self.player.id)
+            gs_copy.visited_cells_by_player[player.id] = gs_copy.get_and_visit_cells(player, action)
+
+            straight_distance = 0
+            horizontal_multiplier, vertical_multiplier = GameService.get_horizontal_and_vertical_multiplier(player)
+
+            for i in range(max(gs_copy.game.height, gs_copy.game.width)):
+                x = player.x + (i + 1) * horizontal_multiplier
+                y = player.y + (i + 1) * vertical_multiplier
+                if x in range(gs_copy.game.width) and y in range(gs_copy.game.height) and (
+                        gs_copy.game.cells[y][x].players is None or len(gs_copy.game.cells[y][x].players) == 0):
+                    straight_distance += 1
+                else:
+                    break
+
+            if len(best_actions) == 0 or straight_distance &gt; max_straight_distance:
+                max_straight_distance = straight_distance
+                best_actions[action] = straight_distance
+                updated_best_actions: Dict[Action, int] = {}
+                for (act, dist) in best_actions.items():  # new max_straight_distance. Remove worth options
+                    if dist &gt;= max_straight_distance - self.__max_worse_distance:
+                        updated_best_actions[act] = dist
+                best_actions = updated_best_actions
+            elif straight_distance &gt;= max_straight_distance - self.__max_worse_distance:  # still good option
+                best_actions[action] = straight_distance
+        except InvalidPlayerMoveException as ex:
+            logging.warning(ex)
+            continue
+
+    return list(best_actions.keys())</code></pre>
+</details>
+</dd>
+<dt id="chillow.service.ai.NotKillingItselfAI.create_next_action"><code class="name flex">
+<span>def <span class="ident">create_next_action</span></span>(<span>self, game: <a title="chillow.model.game.Game" href="../../model/game.html#chillow.model.game.Game">Game</a>, return_value: <bound method BaseContext.Value of <multiprocessing.context.DefaultContext object at 0x000001CE7FAF3C70>>)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>See base class.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def create_next_action(self, game: Game, return_value: Value):
+    &#34;&#34;&#34;See base class.&#34;&#34;&#34;
+    self._turn_ctr += 1
+
+    game_service = GameService(game)
+    game_service.turn.turn_ctr = self._turn_ctr
+
+    surviving_actions = self.find_surviving_actions_with_best_depth(game_service)
+    if AIOptions.max_distance in self.__options:
+        max_distance_actions = self.calc_action_with_max_distance_to_visited_cells(game_service, surviving_actions)
+        action = choice(max_distance_actions) if max_distance_actions is not None and len(
+            max_distance_actions) &gt; 0 else Action.change_nothing
+    else:
+        action = choice(surviving_actions) if surviving_actions is not None and len(
+            surviving_actions) &gt; 0 else Action.change_nothing
+
+    return_value.value = action.get_index()</code></pre>
+</details>
+</dd>
+<dt id="chillow.service.ai.NotKillingItselfAI.find_surviving_actions"><code class="name flex">
+<span>def <span class="ident">find_surviving_actions</span></span>(<span>self, game_service: <a title="chillow.service.game_service.GameService" href="../game_service.html#chillow.service.game_service.GameService">GameService</a>, depth: int) ‑> List[<a title="chillow.model.action.Action" href="../../model/action.html#chillow.model.action.Action">Action</a>]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Finds all actions that will let the player survive for the next rounds.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>game_service</code></strong></dt>
+<dd>The game service used for simulation of actions.</dd>
+<dt><strong><code>depth</code></strong></dt>
+<dd>The number of rounds the player should survive at least.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>Actions that will not kill the player in the next rounds.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def find_surviving_actions(self, game_service: GameService, depth: int) -&gt; List[Action]:
+    &#34;&#34;&#34;Finds all actions that will let the player survive for the next rounds.
+
+    Args:
+        game_service: The game service used for simulation of actions.
+        depth: The number of rounds the player should survive at least.
+
+    Returns:
+        Actions that will not kill the player in the next rounds.
+    &#34;&#34;&#34;
+    result: List[Action] = []
+    for action in Action:
+        gs_copy = pickle.loads(pickle.dumps(game_service))
+        try:
+            player = gs_copy.game.get_player_by_id(self.player.id)
+            if player.speed == self._max_speed and action == Action.speed_up:
+                continue
+            gs_copy.visited_cells_by_player[player.id] = gs_copy.get_and_visit_cells(player, action)
+        except InvalidPlayerMoveException:
+            continue
+        gs_copy.check_and_set_died_players()
+        if player.active:
+            interim_result = []
+            if depth &gt; 1:
+                # recursive call to look further into the future
+                interim_result = self.find_surviving_actions(gs_copy, depth - 1)
+
+            if len(interim_result) &gt; 0 or depth == 1:
+                result += [action]
+
+    return result</code></pre>
+</details>
+</dd>
+<dt id="chillow.service.ai.NotKillingItselfAI.find_surviving_actions_with_best_depth"><code class="name flex">
+<span>def <span class="ident">find_surviving_actions_with_best_depth</span></span>(<span>self, game_service: <a title="chillow.service.game_service.GameService" href="../game_service.html#chillow.service.game_service.GameService">GameService</a>) ‑> List[<a title="chillow.model.action.Action" href="../../model/action.html#chillow.model.action.Action">Action</a>]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Finds all actions that won't kill the player in the next rounds.
+The number of pre-calculated player moves is reduced until surviving actions are found.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>game_service</code></strong></dt>
+<dd>The game service used for simulation of actions.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>Actions that will not kill the player in the next rounds.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def find_surviving_actions_with_best_depth(self, game_service: GameService) -&gt; List[Action]:
+    &#34;&#34;&#34;Finds all actions that won&#39;t kill the player in the next rounds.
+    The number of pre-calculated player moves is reduced until surviving actions are found.
+
+    Args:
+        game_service: The game service used for simulation of actions.
+
+    Returns:
+        Actions that will not kill the player in the next rounds.
+    &#34;&#34;&#34;
+    result: List[Action] = []
+    for current_depth in reversed(range(1, self.__depth + 1)):
+        result = self.find_surviving_actions(game_service, current_depth)
+        if len(result) &gt; 0:
+            break
+
+    return result</code></pre>
+</details>
+</dd>
+<dt id="chillow.service.ai.NotKillingItselfAI.get_information"><code class="name flex">
+<span>def <span class="ident">get_information</span></span>(<span>self) ‑> str</span>
+</code></dt>
+<dd>
+<div class="desc"><p>See base class.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_information(self) -&gt; str:
+    &#34;&#34;&#34;See base class.&#34;&#34;&#34;
+    return (super().get_information() + &#34;, max_worse_distance=&#34; + str(self.__max_worse_distance)
+            + &#34;, depth=&#34; + str(self.__depth))</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+<dt id="chillow.service.ai.PathfindingAI"><code class="flex name class">
+<span>class <span class="ident">PathfindingAI</span></span>
+<span>(</span><span>player: <a title="chillow.model.player.Player" href="../../model/player.html#chillow.model.player.Player">Player</a>, max_speed: int, count_paths_to_check: int)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>AI implementation that chooses actions which will allow it to survive a certain number of moves.</p>
+<p>It does not consider enemy actions. Furthermore, the AI avoids running into too small areas or dead ends.</p>
+<h2 id="attributes">Attributes</h2>
+<dl>
+<dt><strong><code>player</code></strong></dt>
+<dd>The player associated with this AI.</dd>
+</dl>
+<p>Creates a new object of the PathfindingAI.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>player</code></strong></dt>
+<dd>The player assigned to the AI.</dd>
+<dt><strong><code>max_speed</code></strong></dt>
+<dd>The maximum speed the AI can reach.</dd>
+<dt><strong><code>count_paths_to_check</code></strong></dt>
+<dd>The number of paths used to avoid dead ends.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class PathfindingAI(NotKillingItselfAI):
+    &#34;&#34;&#34;AI implementation that chooses actions which will allow it to survive a certain number of moves.
+
+    It does not consider enemy actions. Furthermore, the AI avoids running into too small areas or dead ends.
+
+    Attributes:
+        player: The player associated with this AI.
+    &#34;&#34;&#34;
+
+    def __init__(self, player: Player, max_speed: int, count_paths_to_check: int):
+        &#34;&#34;&#34;Creates a new object of the PathfindingAI.
+
+        Args:
+            player: The player assigned to the AI.
+            max_speed: The maximum speed the AI can reach.
+            count_paths_to_check: The number of paths used to avoid dead ends.
+        &#34;&#34;&#34;
+        super().__init__(player, [], max_speed, 0, 3)
+        self.__count_paths_to_check = count_paths_to_check
+
+    def get_information(self) -&gt; str:
+        &#34;&#34;&#34;See base class.&#34;&#34;&#34;
+        return &#34;max_speed=&#34; + str(self._max_speed) \
+               + &#34;, count_paths_to_check=&#34; + str(self.__count_paths_to_check)
+
+    def create_next_action(self, game: Game, return_value: Value):
+        &#34;&#34;&#34;See base class.&#34;&#34;&#34;
+        self._turn_ctr += 1
+        actions = self.create_next_actions_ranked(game)
+        action = actions[0][0] if actions is not None and len(actions) &gt; 0 else Action.get_random_action()
+        return_value.value = action.get_index()
+
+    def create_next_actions_ranked(self, game: Game) -&gt; Optional[List[Tuple[Action, int]]]:
+        &#34;&#34;&#34;Calculates all actions with the number of reachable paths, with which the AI won&#39;t lose in the next turn.
+
+        Args:
+            game: The game object in which the AI is located and which contains the current status of the game.
+
+        Returns:
+            A list with actions and the corresponding number of accessible paths.
+        &#34;&#34;&#34;
+        game_service = GameService(game)
+        game_service.turn.turn_ctr = self._turn_ctr
+
+        surviving_actions = self.find_surviving_actions_with_best_depth(game_service)
+
+        return self.find_actions_by_best_path_connection(surviving_actions, game)
+
+    def find_actions_by_best_path_connection(self, actions: List[Action], game: Game) -&gt; Optional[
+            List[Tuple[Action, int]]]:
+        &#34;&#34;&#34; Calculates for the passed actions how many paths are still accessible after the execution of the action.
+
+        For this purpose, points are randomly generated on the playing field and an algorithm for finding paths is
+        used to check whether the point can be reached.
+
+        Args:
+            actions: List of actions to check.
+            game: The game that contains the current state of the game.
+
+        Returns:
+            List of actions with the accessible paths.
+        &#34;&#34;&#34;
+        if actions is None or len(actions) == 0:
+            return None
+        # shuffle the actions, so that different actions are chosen if they have the same quality and the AI is not so
+        # easily predictable.
+        shuffle(actions)
+        actions_with_possible_paths: List[Tuple[Action, int]] = []
+        free_cells_for_pathfinding = self.get_random_free_cells_from_playground(game)
+
+        path_finder = BestFirst(diagonal_movement=DiagonalMovement.never)
+
+        for action in actions:
+            game_copy = game.copy()
+            game_service = GameService(game_copy)
+            try:
+                player = game_service.game.get_player_by_id(self.player.id)
+                game_service.visited_cells_by_player[player.id] = game_service.get_and_visit_cells(player, action)
+            except InvalidPlayerMoveException:
+                continue
+
+            matrix = game_copy.translate_cell_matrix_to_pathfinding_matrix()
+            current_possible_paths = 0
+            length_free_cells = len(free_cells_for_pathfinding)
+            for i in range(length_free_cells):
+                grid = Grid(matrix=matrix)
+                start = grid.node(player.x, player.y)
+                end = grid.node(free_cells_for_pathfinding[i][0], free_cells_for_pathfinding[i][1])
+                path, _ = path_finder.find_path(start, end, grid)
+                if len(path) &gt; 0:  # a path exists
+                    current_possible_paths += 1
+
+            actions_with_possible_paths.append((action, current_possible_paths))
+        # Action with most accessible paths at index 0
+        actions_with_possible_paths.sort(key=operator.itemgetter(1), reverse=True)
+        return actions_with_possible_paths
+
+    def get_random_free_cells_from_playground(self, game: Game) -&gt; List[Tuple[int, int]]:
+        &#34;&#34;&#34;Calculates up to count_paths_to_check many points of all free fields on the playing field.
+
+        Args:
+            game: The game that contains the current state of the game.
+
+        Returns:
+            List of coordinates with x- and y-value.
+        &#34;&#34;&#34;
+        free_cells: List[(int, int)] = []
+        for x in range(game.width):
+            for y in range(game.height):
+                if game.cells[y][x].players is None or len(game.cells[y][x].players) == 0:
+                    free_cells.append((x, y))
+        shuffle(free_cells)  # shuffle the coordinates to get a random distribution
+        return free_cells[:min(self.__count_paths_to_check, len(free_cells))]
+
+    def _get_count_paths_to_check(self) -&gt; int:
+        return self.__count_paths_to_check</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="chillow.service.ai.not_killing_itself_ai.NotKillingItselfAI" href="not_killing_itself_ai.html#chillow.service.ai.not_killing_itself_ai.NotKillingItselfAI">NotKillingItselfAI</a></li>
+<li><a title="chillow.service.ai.artificial_intelligence.ArtificialIntelligence" href="artificial_intelligence.html#chillow.service.ai.artificial_intelligence.ArtificialIntelligence">ArtificialIntelligence</a></li>
+</ul>
+<h3>Subclasses</h3>
+<ul class="hlist">
+<li><a title="chillow.service.ai.pathfinding_search_tree_ai.PathfindingSearchTreeAI" href="pathfinding_search_tree_ai.html#chillow.service.ai.pathfinding_search_tree_ai.PathfindingSearchTreeAI">PathfindingSearchTreeAI</a></li>
+<li><a title="chillow.service.ai.search_tree_pathfinding_ai.SearchTreePathfindingAI" href="search_tree_pathfinding_ai.html#chillow.service.ai.search_tree_pathfinding_ai.SearchTreePathfindingAI">SearchTreePathfindingAI</a></li>
+</ul>
+<h3>Methods</h3>
+<dl>
+<dt id="chillow.service.ai.PathfindingAI.create_next_actions_ranked"><code class="name flex">
+<span>def <span class="ident">create_next_actions_ranked</span></span>(<span>self, game: <a title="chillow.model.game.Game" href="../../model/game.html#chillow.model.game.Game">Game</a>) ‑> Optional[List[Tuple[<a title="chillow.model.action.Action" href="../../model/action.html#chillow.model.action.Action">Action</a>, int]]]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Calculates all actions with the number of reachable paths, with which the AI won't lose in the next turn.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>game</code></strong></dt>
+<dd>The game object in which the AI is located and which contains the current status of the game.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>A list with actions and the corresponding number of accessible paths.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def create_next_actions_ranked(self, game: Game) -&gt; Optional[List[Tuple[Action, int]]]:
+    &#34;&#34;&#34;Calculates all actions with the number of reachable paths, with which the AI won&#39;t lose in the next turn.
+
+    Args:
+        game: The game object in which the AI is located and which contains the current status of the game.
+
+    Returns:
+        A list with actions and the corresponding number of accessible paths.
+    &#34;&#34;&#34;
+    game_service = GameService(game)
+    game_service.turn.turn_ctr = self._turn_ctr
+
+    surviving_actions = self.find_surviving_actions_with_best_depth(game_service)
+
+    return self.find_actions_by_best_path_connection(surviving_actions, game)</code></pre>
+</details>
+</dd>
+<dt id="chillow.service.ai.PathfindingAI.find_actions_by_best_path_connection"><code class="name flex">
+<span>def <span class="ident">find_actions_by_best_path_connection</span></span>(<span>self, actions: List[<a title="chillow.model.action.Action" href="../../model/action.html#chillow.model.action.Action">Action</a>], game: <a title="chillow.model.game.Game" href="../../model/game.html#chillow.model.game.Game">Game</a>) ‑> Optional[List[Tuple[<a title="chillow.model.action.Action" href="../../model/action.html#chillow.model.action.Action">Action</a>, int]]]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Calculates for the passed actions how many paths are still accessible after the execution of the action.</p>
+<p>For this purpose, points are randomly generated on the playing field and an algorithm for finding paths is
+used to check whether the point can be reached.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>actions</code></strong></dt>
+<dd>List of actions to check.</dd>
+<dt><strong><code>game</code></strong></dt>
+<dd>The game that contains the current state of the game.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>List of actions with the accessible paths.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def find_actions_by_best_path_connection(self, actions: List[Action], game: Game) -&gt; Optional[
+        List[Tuple[Action, int]]]:
+    &#34;&#34;&#34; Calculates for the passed actions how many paths are still accessible after the execution of the action.
+
+    For this purpose, points are randomly generated on the playing field and an algorithm for finding paths is
+    used to check whether the point can be reached.
+
+    Args:
+        actions: List of actions to check.
+        game: The game that contains the current state of the game.
+
+    Returns:
+        List of actions with the accessible paths.
+    &#34;&#34;&#34;
+    if actions is None or len(actions) == 0:
+        return None
+    # shuffle the actions, so that different actions are chosen if they have the same quality and the AI is not so
+    # easily predictable.
+    shuffle(actions)
+    actions_with_possible_paths: List[Tuple[Action, int]] = []
+    free_cells_for_pathfinding = self.get_random_free_cells_from_playground(game)
+
+    path_finder = BestFirst(diagonal_movement=DiagonalMovement.never)
+
+    for action in actions:
+        game_copy = game.copy()
+        game_service = GameService(game_copy)
+        try:
+            player = game_service.game.get_player_by_id(self.player.id)
+            game_service.visited_cells_by_player[player.id] = game_service.get_and_visit_cells(player, action)
+        except InvalidPlayerMoveException:
+            continue
+
+        matrix = game_copy.translate_cell_matrix_to_pathfinding_matrix()
+        current_possible_paths = 0
+        length_free_cells = len(free_cells_for_pathfinding)
+        for i in range(length_free_cells):
+            grid = Grid(matrix=matrix)
+            start = grid.node(player.x, player.y)
+            end = grid.node(free_cells_for_pathfinding[i][0], free_cells_for_pathfinding[i][1])
+            path, _ = path_finder.find_path(start, end, grid)
+            if len(path) &gt; 0:  # a path exists
+                current_possible_paths += 1
+
+        actions_with_possible_paths.append((action, current_possible_paths))
+    # Action with most accessible paths at index 0
+    actions_with_possible_paths.sort(key=operator.itemgetter(1), reverse=True)
+    return actions_with_possible_paths</code></pre>
+</details>
+</dd>
+<dt id="chillow.service.ai.PathfindingAI.get_random_free_cells_from_playground"><code class="name flex">
+<span>def <span class="ident">get_random_free_cells_from_playground</span></span>(<span>self, game: <a title="chillow.model.game.Game" href="../../model/game.html#chillow.model.game.Game">Game</a>) ‑> List[Tuple[int, int]]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Calculates up to count_paths_to_check many points of all free fields on the playing field.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>game</code></strong></dt>
+<dd>The game that contains the current state of the game.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>List of coordinates with x- and y-value.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_random_free_cells_from_playground(self, game: Game) -&gt; List[Tuple[int, int]]:
+    &#34;&#34;&#34;Calculates up to count_paths_to_check many points of all free fields on the playing field.
+
+    Args:
+        game: The game that contains the current state of the game.
+
+    Returns:
+        List of coordinates with x- and y-value.
+    &#34;&#34;&#34;
+    free_cells: List[(int, int)] = []
+    for x in range(game.width):
+        for y in range(game.height):
+            if game.cells[y][x].players is None or len(game.cells[y][x].players) == 0:
+                free_cells.append((x, y))
+    shuffle(free_cells)  # shuffle the coordinates to get a random distribution
+    return free_cells[:min(self.__count_paths_to_check, len(free_cells))]</code></pre>
+</details>
+</dd>
+</dl>
+<h3>Inherited members</h3>
+<ul class="hlist">
+<li><code><b><a title="chillow.service.ai.not_killing_itself_ai.NotKillingItselfAI" href="not_killing_itself_ai.html#chillow.service.ai.not_killing_itself_ai.NotKillingItselfAI">NotKillingItselfAI</a></b></code>:
+<ul class="hlist">
+<li><code><a title="chillow.service.ai.not_killing_itself_ai.NotKillingItselfAI.calc_action_with_max_distance_to_visited_cells" href="not_killing_itself_ai.html#chillow.service.ai.not_killing_itself_ai.NotKillingItselfAI.calc_action_with_max_distance_to_visited_cells">calc_action_with_max_distance_to_visited_cells</a></code></li>
+<li><code><a title="chillow.service.ai.not_killing_itself_ai.NotKillingItselfAI.create_next_action" href="not_killing_itself_ai.html#chillow.service.ai.not_killing_itself_ai.NotKillingItselfAI.create_next_action">create_next_action</a></code></li>
+<li><code><a title="chillow.service.ai.not_killing_itself_ai.NotKillingItselfAI.find_surviving_actions" href="not_killing_itself_ai.html#chillow.service.ai.not_killing_itself_ai.NotKillingItselfAI.find_surviving_actions">find_surviving_actions</a></code></li>
+<li><code><a title="chillow.service.ai.not_killing_itself_ai.NotKillingItselfAI.find_surviving_actions_with_best_depth" href="not_killing_itself_ai.html#chillow.service.ai.not_killing_itself_ai.NotKillingItselfAI.find_surviving_actions_with_best_depth">find_surviving_actions_with_best_depth</a></code></li>
+<li><code><a title="chillow.service.ai.not_killing_itself_ai.NotKillingItselfAI.get_information" href="not_killing_itself_ai.html#chillow.service.ai.not_killing_itself_ai.NotKillingItselfAI.get_information">get_information</a></code></li>
+</ul>
+</li>
+</ul>
+</dd>
+<dt id="chillow.service.ai.PathfindingSearchTreeAI"><code class="flex name class">
+<span>class <span class="ident">PathfindingSearchTreeAI</span></span>
+<span>(</span><span>player: <a title="chillow.model.player.Player" href="../../model/player.html#chillow.model.player.Player">Player</a>, max_speed: int, count_paths_to_check: int, depth: int, paths_tolerance: float = 0.75, distance_to_check: int = 0)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>This AI combines the PathfindingAI and the SearchTreeAI by favoring the former.</p>
+<p>Therefore it ranks all actions based on the PathfindingAI and checks finds the first surviving action with the
+SearchTreeAI.</p>
+<h2 id="attributes">Attributes</h2>
+<dl>
+<dt><strong><code>player</code></strong></dt>
+<dd>The player associated with this AI.</dd>
+</dl>
+<p>Creates a new object of the PathfindingSearchTreeAI.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>player</code></strong></dt>
+<dd>The player assigned to the AI.</dd>
+<dt><strong><code>max_speed</code></strong></dt>
+<dd>The maximum speed the AI can reach.</dd>
+<dt><strong><code>count_paths_to_check</code></strong></dt>
+<dd>The number of paths used to avoid dead ends.</dd>
+<dt><strong><code>depth</code></strong></dt>
+<dd>Depth pre-calculating actions.</dd>
+<dt><strong><code>paths_tolerance</code></strong></dt>
+<dd>A tolerance, whereby more than just the best action is calculated. Actions which are
+worse, but within this tolerance, are also considered.
+depth: Number of player actions that are looked into the future.</dd>
+<dt><strong><code>distance_to_check</code></strong></dt>
+<dd>Distance an enemy player is allowed to be at maximum distance, so that he is taken into
+account in the calculations.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class PathfindingSearchTreeAI(PathfindingAI, SearchTreeAI):
+    &#34;&#34;&#34;This AI combines the PathfindingAI and the SearchTreeAI by favoring the former.
+
+    Therefore it ranks all actions based on the PathfindingAI and checks finds the first surviving action with the
+    SearchTreeAI.
+
+    Attributes:
+        player: The player associated with this AI.
+    &#34;&#34;&#34;
+
+    def __init__(self, player: Player, max_speed: int, count_paths_to_check: int, depth: int,
+                 paths_tolerance: float = 0.75, distance_to_check: int = 0):
+        &#34;&#34;&#34;Creates a new object of the PathfindingSearchTreeAI.
+
+        Args:
+            player: The player assigned to the AI.
+            max_speed: The maximum speed the AI can reach.
+            count_paths_to_check: The number of paths used to avoid dead ends.
+            depth: Depth pre-calculating actions.
+            paths_tolerance: A tolerance, whereby more than just the best action is calculated. Actions which are
+                worse, but within this tolerance, are also considered.
+                depth: Number of player actions that are looked into the future.
+            distance_to_check: Distance an enemy player is allowed to be at maximum distance, so that he is taken into
+                account in the calculations.
+        &#34;&#34;&#34;
+        PathfindingAI.__init__(self, player, max_speed, count_paths_to_check)
+        SearchTreeAI.__init__(self, player, depth, max_speed, distance_to_check=distance_to_check)
+        self.__paths_tolerance = paths_tolerance
+
+    def get_information(self) -&gt; str:
+        &#34;&#34;&#34;See base class.&#34;&#34;&#34;
+        return &#34;max_speed=&#34; + str(self._max_speed) \
+               + &#34;, paths_tolerance=&#34; + str(self.__paths_tolerance) \
+               + &#34;, count_paths_to_check=&#34; + str(self._get_count_paths_to_check()) \
+               + &#34;, depth=&#34; + str(self._get_depth()) \
+               + &#34;, distance_to_check=&#34; + str(self._get_distance_to_check())
+
+    def create_next_action(self, game: Game, return_value: Value):
+        &#34;&#34;&#34;See base class.&#34;&#34;&#34;
+        self._turn_ctr += 1
+
+        pathfinding_actions = self.create_next_actions_ranked(game)
+        self.set_best_action(pathfinding_actions, [], return_value)
+        search_tree_actions = self.create_all_next_surviving_actions(game)
+        self.set_best_action(pathfinding_actions, search_tree_actions, return_value)
+
+    def set_best_action(self, pathfinding_actions: List[Tuple[Action, int]], search_tree_actions: List[Action],
+                        return_value: Value):
+        &#34;&#34;&#34;Saves the best action from the list of actions from PathfindingAI and SearchTreeAI.
+
+        Args:
+            pathfinding_actions: List of actions calculated by PathfindingAI.
+            search_tree_actions: List of actions calculated by SearchTreeAI
+            return_value: Object to save the result of the calculation.
+        &#34;&#34;&#34;
+        best_action = self.get_best_action(pathfinding_actions, search_tree_actions)
+        return_value.value = best_action.get_index() if best_action is not None else return_value.value
+
+    def get_best_action(self, pathfinding_actions: List[Tuple[Action, int]],
+                        search_tree_actions: List[Action]) -&gt; Optional[Action]:
+        &#34;&#34;&#34;Calculates the best action from the list of actions from PathfindingAI and SearchTreeAI.
+
+        Args:
+            pathfinding_actions: List of actions calculated by PathfindingAI.
+            search_tree_actions: List of actions calculated by SearchTreeAI
+
+        Returns:
+            Best action if there is any.
+        &#34;&#34;&#34;
+        if search_tree_actions is None or len(search_tree_actions) == 0:
+            if pathfinding_actions is not None and len(pathfinding_actions) &gt; 0:
+                return pathfinding_actions[0][0]
+            return None
+        elif pathfinding_actions is None or len(pathfinding_actions) == 0:
+            return search_tree_actions[0]
+
+        for (action, possible_paths) in pathfinding_actions:
+            if action in search_tree_actions:
+                if possible_paths == pathfinding_actions[0][1]:
+                    return action  # best path and surviving guaranteed
+                elif possible_paths &gt;= pathfinding_actions[0][1] * self.__paths_tolerance:
+                    return action  # good path and surviving guaranteed
+                else:
+                    break
+
+        return pathfinding_actions[0][0]</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="chillow.service.ai.pathfinding_ai.PathfindingAI" href="pathfinding_ai.html#chillow.service.ai.pathfinding_ai.PathfindingAI">PathfindingAI</a></li>
+<li><a title="chillow.service.ai.not_killing_itself_ai.NotKillingItselfAI" href="not_killing_itself_ai.html#chillow.service.ai.not_killing_itself_ai.NotKillingItselfAI">NotKillingItselfAI</a></li>
+<li><a title="chillow.service.ai.search_tree_ai.SearchTreeAI" href="search_tree_ai.html#chillow.service.ai.search_tree_ai.SearchTreeAI">SearchTreeAI</a></li>
+<li><a title="chillow.service.ai.artificial_intelligence.ArtificialIntelligence" href="artificial_intelligence.html#chillow.service.ai.artificial_intelligence.ArtificialIntelligence">ArtificialIntelligence</a></li>
+</ul>
+<h3>Methods</h3>
+<dl>
+<dt id="chillow.service.ai.PathfindingSearchTreeAI.get_best_action"><code class="name flex">
+<span>def <span class="ident">get_best_action</span></span>(<span>self, pathfinding_actions: List[Tuple[<a title="chillow.model.action.Action" href="../../model/action.html#chillow.model.action.Action">Action</a>, int]], search_tree_actions: List[<a title="chillow.model.action.Action" href="../../model/action.html#chillow.model.action.Action">Action</a>]) ‑> Optional[<a title="chillow.model.action.Action" href="../../model/action.html#chillow.model.action.Action">Action</a>]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Calculates the best action from the list of actions from PathfindingAI and SearchTreeAI.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>pathfinding_actions</code></strong></dt>
+<dd>List of actions calculated by PathfindingAI.</dd>
+<dt><strong><code>search_tree_actions</code></strong></dt>
+<dd>List of actions calculated by SearchTreeAI</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>Best action if there is any.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_best_action(self, pathfinding_actions: List[Tuple[Action, int]],
+                    search_tree_actions: List[Action]) -&gt; Optional[Action]:
+    &#34;&#34;&#34;Calculates the best action from the list of actions from PathfindingAI and SearchTreeAI.
+
+    Args:
+        pathfinding_actions: List of actions calculated by PathfindingAI.
+        search_tree_actions: List of actions calculated by SearchTreeAI
+
+    Returns:
+        Best action if there is any.
+    &#34;&#34;&#34;
+    if search_tree_actions is None or len(search_tree_actions) == 0:
+        if pathfinding_actions is not None and len(pathfinding_actions) &gt; 0:
+            return pathfinding_actions[0][0]
+        return None
+    elif pathfinding_actions is None or len(pathfinding_actions) == 0:
+        return search_tree_actions[0]
+
+    for (action, possible_paths) in pathfinding_actions:
+        if action in search_tree_actions:
+            if possible_paths == pathfinding_actions[0][1]:
+                return action  # best path and surviving guaranteed
+            elif possible_paths &gt;= pathfinding_actions[0][1] * self.__paths_tolerance:
+                return action  # good path and surviving guaranteed
+            else:
+                break
+
+    return pathfinding_actions[0][0]</code></pre>
+</details>
+</dd>
+<dt id="chillow.service.ai.PathfindingSearchTreeAI.set_best_action"><code class="name flex">
+<span>def <span class="ident">set_best_action</span></span>(<span>self, pathfinding_actions: List[Tuple[<a title="chillow.model.action.Action" href="../../model/action.html#chillow.model.action.Action">Action</a>, int]], search_tree_actions: List[<a title="chillow.model.action.Action" href="../../model/action.html#chillow.model.action.Action">Action</a>], return_value: <bound method BaseContext.Value of <multiprocessing.context.DefaultContext object at 0x000001CE7FAF3C70>>)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Saves the best action from the list of actions from PathfindingAI and SearchTreeAI.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>pathfinding_actions</code></strong></dt>
+<dd>List of actions calculated by PathfindingAI.</dd>
+<dt><strong><code>search_tree_actions</code></strong></dt>
+<dd>List of actions calculated by SearchTreeAI</dd>
+<dt><strong><code>return_value</code></strong></dt>
+<dd>Object to save the result of the calculation.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def set_best_action(self, pathfinding_actions: List[Tuple[Action, int]], search_tree_actions: List[Action],
+                    return_value: Value):
+    &#34;&#34;&#34;Saves the best action from the list of actions from PathfindingAI and SearchTreeAI.
+
+    Args:
+        pathfinding_actions: List of actions calculated by PathfindingAI.
+        search_tree_actions: List of actions calculated by SearchTreeAI
+        return_value: Object to save the result of the calculation.
+    &#34;&#34;&#34;
+    best_action = self.get_best_action(pathfinding_actions, search_tree_actions)
+    return_value.value = best_action.get_index() if best_action is not None else return_value.value</code></pre>
+</details>
+</dd>
+</dl>
+<h3>Inherited members</h3>
+<ul class="hlist">
+<li><code><b><a title="chillow.service.ai.pathfinding_ai.PathfindingAI" href="pathfinding_ai.html#chillow.service.ai.pathfinding_ai.PathfindingAI">PathfindingAI</a></b></code>:
+<ul class="hlist">
+<li><code><a title="chillow.service.ai.pathfinding_ai.PathfindingAI.calc_action_with_max_distance_to_visited_cells" href="not_killing_itself_ai.html#chillow.service.ai.not_killing_itself_ai.NotKillingItselfAI.calc_action_with_max_distance_to_visited_cells">calc_action_with_max_distance_to_visited_cells</a></code></li>
+<li><code><a title="chillow.service.ai.pathfinding_ai.PathfindingAI.create_next_action" href="not_killing_itself_ai.html#chillow.service.ai.not_killing_itself_ai.NotKillingItselfAI.create_next_action">create_next_action</a></code></li>
+<li><code><a title="chillow.service.ai.pathfinding_ai.PathfindingAI.create_next_actions_ranked" href="pathfinding_ai.html#chillow.service.ai.pathfinding_ai.PathfindingAI.create_next_actions_ranked">create_next_actions_ranked</a></code></li>
+<li><code><a title="chillow.service.ai.pathfinding_ai.PathfindingAI.find_actions_by_best_path_connection" href="pathfinding_ai.html#chillow.service.ai.pathfinding_ai.PathfindingAI.find_actions_by_best_path_connection">find_actions_by_best_path_connection</a></code></li>
+<li><code><a title="chillow.service.ai.pathfinding_ai.PathfindingAI.find_surviving_actions" href="not_killing_itself_ai.html#chillow.service.ai.not_killing_itself_ai.NotKillingItselfAI.find_surviving_actions">find_surviving_actions</a></code></li>
+<li><code><a title="chillow.service.ai.pathfinding_ai.PathfindingAI.find_surviving_actions_with_best_depth" href="not_killing_itself_ai.html#chillow.service.ai.not_killing_itself_ai.NotKillingItselfAI.find_surviving_actions_with_best_depth">find_surviving_actions_with_best_depth</a></code></li>
+<li><code><a title="chillow.service.ai.pathfinding_ai.PathfindingAI.get_information" href="not_killing_itself_ai.html#chillow.service.ai.not_killing_itself_ai.NotKillingItselfAI.get_information">get_information</a></code></li>
+<li><code><a title="chillow.service.ai.pathfinding_ai.PathfindingAI.get_random_free_cells_from_playground" href="pathfinding_ai.html#chillow.service.ai.pathfinding_ai.PathfindingAI.get_random_free_cells_from_playground">get_random_free_cells_from_playground</a></code></li>
+</ul>
+</li>
+<li><code><b><a title="chillow.service.ai.search_tree_ai.SearchTreeAI" href="search_tree_ai.html#chillow.service.ai.search_tree_ai.SearchTreeAI">SearchTreeAI</a></b></code>:
+<ul class="hlist">
+<li><code><a title="chillow.service.ai.search_tree_ai.SearchTreeAI.create_all_next_surviving_actions" href="search_tree_ai.html#chillow.service.ai.search_tree_ai.SearchTreeAI.create_all_next_surviving_actions">create_all_next_surviving_actions</a></code></li>
+</ul>
+</li>
+</ul>
+</dd>
+<dt id="chillow.service.ai.RandomAI"><code class="flex name class">
+<span>class <span class="ident">RandomAI</span></span>
+<span>(</span><span>player: <a title="chillow.model.player.Player" href="../../model/player.html#chillow.model.player.Player">Player</a>, max_speed: int = 10)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>AI that randomly chooses an action ignoring the state of the game.</p>
+<h2 id="attributes">Attributes</h2>
+<dl>
+<dt><strong><code>player</code></strong></dt>
+<dd>The player associated with this AI.</dd>
+</dl>
+<p>Creates a new object of an AI.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>player</code></strong></dt>
+<dd>The player assigned to the AI.</dd>
+<dt><strong><code>max_speed</code></strong></dt>
+<dd>The maximum speed the AI can reach.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class RandomAI(ArtificialIntelligence):
+    &#34;&#34;&#34;AI that randomly chooses an action ignoring the state of the game.
+
+    Attributes:
+        player: The player associated with this AI.
+    &#34;&#34;&#34;
+
+    def create_next_action(self, game: Game, return_value: Value):
+        &#34;&#34;&#34;See base class.&#34;&#34;&#34;
+        self._turn_ctr += 1
+        action = Action.get_random_action()
+        return_value.value = action.get_index()
+
+    def get_information(self) -&gt; str:
+        &#34;&#34;&#34;See base class.&#34;&#34;&#34;
+        return &#34;&#34;</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="chillow.service.ai.artificial_intelligence.ArtificialIntelligence" href="artificial_intelligence.html#chillow.service.ai.artificial_intelligence.ArtificialIntelligence">ArtificialIntelligence</a></li>
+</ul>
+<h3>Subclasses</h3>
+<ul class="hlist">
+<li><a title="chillow.service.ai.random_ai.RandomWaitingAI" href="random_ai.html#chillow.service.ai.random_ai.RandomWaitingAI">RandomWaitingAI</a></li>
+</ul>
+<h3>Methods</h3>
+<dl>
+<dt id="chillow.service.ai.RandomAI.create_next_action"><code class="name flex">
+<span>def <span class="ident">create_next_action</span></span>(<span>self, game: <a title="chillow.model.game.Game" href="../../model/game.html#chillow.model.game.Game">Game</a>, return_value: <bound method BaseContext.Value of <multiprocessing.context.DefaultContext object at 0x000001CE7FAF3C70>>)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>See base class.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def create_next_action(self, game: Game, return_value: Value):
+    &#34;&#34;&#34;See base class.&#34;&#34;&#34;
+    self._turn_ctr += 1
+    action = Action.get_random_action()
+    return_value.value = action.get_index()</code></pre>
+</details>
+</dd>
+<dt id="chillow.service.ai.RandomAI.get_information"><code class="name flex">
+<span>def <span class="ident">get_information</span></span>(<span>self) ‑> str</span>
+</code></dt>
+<dd>
+<div class="desc"><p>See base class.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_information(self) -&gt; str:
+    &#34;&#34;&#34;See base class.&#34;&#34;&#34;
+    return &#34;&#34;</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+<dt id="chillow.service.ai.RandomWaitingAI"><code class="flex name class">
+<span>class <span class="ident">RandomWaitingAI</span></span>
+<span>(</span><span>player: <a title="chillow.model.player.Player" href="../../model/player.html#chillow.model.player.Player">Player</a>, max_speed: int = 10)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>AI that randomly chooses an action ignoring the state of the game and waits five seconds.</p>
+<h2 id="attributes">Attributes</h2>
+<dl>
+<dt><strong><code>player</code></strong></dt>
+<dd>The player associated with this AI.</dd>
+</dl>
+<p>Creates a new object of an AI.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>player</code></strong></dt>
+<dd>The player assigned to the AI.</dd>
+<dt><strong><code>max_speed</code></strong></dt>
+<dd>The maximum speed the AI can reach.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class RandomWaitingAI(RandomAI):
+    &#34;&#34;&#34;AI that randomly chooses an action ignoring the state of the game and waits five seconds.
+
+    Attributes:
+        player: The player associated with this AI.
+    &#34;&#34;&#34;
+
+    def create_next_action(self, game: Game, return_value: Value):
+        time.sleep(5)
+        super().create_next_action(game, return_value)</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="chillow.service.ai.random_ai.RandomAI" href="random_ai.html#chillow.service.ai.random_ai.RandomAI">RandomAI</a></li>
+<li><a title="chillow.service.ai.artificial_intelligence.ArtificialIntelligence" href="artificial_intelligence.html#chillow.service.ai.artificial_intelligence.ArtificialIntelligence">ArtificialIntelligence</a></li>
+</ul>
+<h3>Inherited members</h3>
+<ul class="hlist">
+<li><code><b><a title="chillow.service.ai.random_ai.RandomAI" href="random_ai.html#chillow.service.ai.random_ai.RandomAI">RandomAI</a></b></code>:
+<ul class="hlist">
+<li><code><a title="chillow.service.ai.random_ai.RandomAI.create_next_action" href="random_ai.html#chillow.service.ai.random_ai.RandomAI.create_next_action">create_next_action</a></code></li>
+<li><code><a title="chillow.service.ai.random_ai.RandomAI.get_information" href="random_ai.html#chillow.service.ai.random_ai.RandomAI.get_information">get_information</a></code></li>
+</ul>
+</li>
+</ul>
+</dd>
+<dt id="chillow.service.ai.SearchTreeAI"><code class="flex name class">
+<span>class <span class="ident">SearchTreeAI</span></span>
+<span>(</span><span>player: <a title="chillow.model.player.Player" href="../../model/player.html#chillow.model.player.Player">Player</a>, depth: int, max_speed: int = 10, randomize: bool = False, distance_to_check: int = 0)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>The SearchTreeAI tries to create a tree by simulating different actions for all player for the next rounds.</p>
+<p>If there is an initial action that lets the player survive for the next rounds not depending on which action
+the other players will make, this action will be chosen.</p>
+<h2 id="attributes">Attributes</h2>
+<dl>
+<dt><strong><code>player</code></strong></dt>
+<dd>The player associated with this AI.</dd>
+</dl>
+<p>Creates a new object of the SearchTreeAI.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>player</code></strong></dt>
+<dd>The player assigned to the AI.</dd>
+<dt><strong><code>max_speed</code></strong></dt>
+<dd>The maximum speed the AI can reach.</dd>
+<dt><strong><code>depth</code></strong></dt>
+<dd>Depth pre-calculating actions.</dd>
+<dt><strong><code>randomize</code></strong></dt>
+<dd>Indicating whether to calculate actions in tree in random order.</dd>
+</dl>
+<p>distance_to_check:
+Distance an enemy player is allowed to be at maximum distance, so that he is taken into
+account in the calculations.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class SearchTreeAI(ArtificialIntelligence):
+    &#34;&#34;&#34;The SearchTreeAI tries to create a tree by simulating different actions for all player for the next rounds.
+
+    If there is an initial action that lets the player survive for the next rounds not depending on which action
+    the other players will make, this action will be chosen.
+
+    Attributes:
+        player: The player associated with this AI.
+    &#34;&#34;&#34;
+
+    def __init__(self, player: Player, depth: int, max_speed: int = 10, randomize: bool = False,
+                 distance_to_check: int = 0):
+        &#34;&#34;&#34; Creates a new object of the SearchTreeAI.
+
+        Args:
+            player: The player assigned to the AI.
+            max_speed: The maximum speed the AI can reach.
+            depth: Depth pre-calculating actions.
+            randomize: Indicating whether to calculate actions in tree in random order.
+            distance_to_check:
+                Distance an enemy player is allowed to be at maximum distance, so that he is taken into
+                account in the calculations.
+        &#34;&#34;&#34;
+
+        super().__init__(player, max_speed)
+        self.__depth = depth
+        self.__randomize = randomize
+        self.__distance_to_check = distance_to_check
+
+    def get_information(self) -&gt; str:
+        &#34;&#34;&#34;See base class.&#34;&#34;&#34;
+        return (super().get_information() +
+                &#34;, depth=&#34; + str(self.__depth) +
+                &#34;, randomize=&#34; + str(self.__randomize) +
+                &#34;, distance_to_check=&#34; + str(self.__distance_to_check))
+
+    def create_next_action(self, game: Game, return_value: Value):
+        &#34;&#34;&#34;See base class.&#34;&#34;&#34;
+        self._turn_ctr += 1
+
+        root = SearchTreeRoot(game.copy())
+        player_ids_to_watch = game.get_other_player_ids(self.player, self.__distance_to_check, True)
+        combinations = Action.get_combinations(len(player_ids_to_watch))
+
+        action = root.calculate_action(self.player, player_ids_to_watch, combinations, self.__depth, self._turn_ctr,
+                                       True, [], self._max_speed, self.__randomize)
+        return_value.value = (action if action is not None else Action.get_random_action()).get_index()
+
+    def create_all_next_surviving_actions(self, game: Game) -&gt; List[Action]:
+        &#34;&#34;&#34;Calculates not only one but all actions that will let the player survive for the next rounds.
+
+        Args:
+            game: The current state of the game.
+
+        Returns:
+            A list of actions which will let the player survive for the next rounds.
+        &#34;&#34;&#34;
+
+        root = SearchTreeRoot(game.copy())
+        player_ids_to_watch = game.get_other_player_ids(self.player, self.__distance_to_check, True)
+        combinations = Action.get_combinations(len(player_ids_to_watch))
+
+        search_tree_actions = []
+
+        for action in Action.get_actions():
+            if root.calculate_action(self.player, player_ids_to_watch, combinations, self.__depth, self._turn_ctr, True,
+                                     [action], self._max_speed, True) is not None:
+                search_tree_actions.append(action)
+
+        return search_tree_actions
+
+    def _get_depth(self) -&gt; int:
+        return self.__depth
+
+    def _get_distance_to_check(self) -&gt; int:
+        return self.__distance_to_check</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="chillow.service.ai.artificial_intelligence.ArtificialIntelligence" href="artificial_intelligence.html#chillow.service.ai.artificial_intelligence.ArtificialIntelligence">ArtificialIntelligence</a></li>
+</ul>
+<h3>Subclasses</h3>
+<ul class="hlist">
+<li><a title="chillow.service.ai.pathfinding_search_tree_ai.PathfindingSearchTreeAI" href="pathfinding_search_tree_ai.html#chillow.service.ai.pathfinding_search_tree_ai.PathfindingSearchTreeAI">PathfindingSearchTreeAI</a></li>
+<li><a title="chillow.service.ai.search_tree_pathfinding_ai.SearchTreePathfindingAI" href="search_tree_pathfinding_ai.html#chillow.service.ai.search_tree_pathfinding_ai.SearchTreePathfindingAI">SearchTreePathfindingAI</a></li>
+</ul>
+<h3>Methods</h3>
+<dl>
+<dt id="chillow.service.ai.SearchTreeAI.create_all_next_surviving_actions"><code class="name flex">
+<span>def <span class="ident">create_all_next_surviving_actions</span></span>(<span>self, game: <a title="chillow.model.game.Game" href="../../model/game.html#chillow.model.game.Game">Game</a>) ‑> List[<a title="chillow.model.action.Action" href="../../model/action.html#chillow.model.action.Action">Action</a>]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Calculates not only one but all actions that will let the player survive for the next rounds.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>game</code></strong></dt>
+<dd>The current state of the game.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>A list of actions which will let the player survive for the next rounds.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def create_all_next_surviving_actions(self, game: Game) -&gt; List[Action]:
+    &#34;&#34;&#34;Calculates not only one but all actions that will let the player survive for the next rounds.
+
+    Args:
+        game: The current state of the game.
+
+    Returns:
+        A list of actions which will let the player survive for the next rounds.
+    &#34;&#34;&#34;
+
+    root = SearchTreeRoot(game.copy())
+    player_ids_to_watch = game.get_other_player_ids(self.player, self.__distance_to_check, True)
+    combinations = Action.get_combinations(len(player_ids_to_watch))
+
+    search_tree_actions = []
+
+    for action in Action.get_actions():
+        if root.calculate_action(self.player, player_ids_to_watch, combinations, self.__depth, self._turn_ctr, True,
+                                 [action], self._max_speed, True) is not None:
+            search_tree_actions.append(action)
+
+    return search_tree_actions</code></pre>
+</details>
+</dd>
+<dt id="chillow.service.ai.SearchTreeAI.create_next_action"><code class="name flex">
+<span>def <span class="ident">create_next_action</span></span>(<span>self, game: <a title="chillow.model.game.Game" href="../../model/game.html#chillow.model.game.Game">Game</a>, return_value: <bound method BaseContext.Value of <multiprocessing.context.DefaultContext object at 0x000001CE7FAF3C70>>)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>See base class.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def create_next_action(self, game: Game, return_value: Value):
+    &#34;&#34;&#34;See base class.&#34;&#34;&#34;
+    self._turn_ctr += 1
+
+    root = SearchTreeRoot(game.copy())
+    player_ids_to_watch = game.get_other_player_ids(self.player, self.__distance_to_check, True)
+    combinations = Action.get_combinations(len(player_ids_to_watch))
+
+    action = root.calculate_action(self.player, player_ids_to_watch, combinations, self.__depth, self._turn_ctr,
+                                   True, [], self._max_speed, self.__randomize)
+    return_value.value = (action if action is not None else Action.get_random_action()).get_index()</code></pre>
+</details>
+</dd>
+<dt id="chillow.service.ai.SearchTreeAI.get_information"><code class="name flex">
+<span>def <span class="ident">get_information</span></span>(<span>self) ‑> str</span>
+</code></dt>
+<dd>
+<div class="desc"><p>See base class.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_information(self) -&gt; str:
+    &#34;&#34;&#34;See base class.&#34;&#34;&#34;
+    return (super().get_information() +
+            &#34;, depth=&#34; + str(self.__depth) +
+            &#34;, randomize=&#34; + str(self.__randomize) +
+            &#34;, distance_to_check=&#34; + str(self.__distance_to_check))</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+<dt id="chillow.service.ai.SearchTreePathfindingAI"><code class="flex name class">
+<span>class <span class="ident">SearchTreePathfindingAI</span></span>
+<span>(</span><span>player: <a title="chillow.model.player.Player" href="../../model/player.html#chillow.model.player.Player">Player</a>, max_speed: int, count_paths_to_check: int, depth: int, distance_to_check: int = 0)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>This AI combines the SearchTreeAI and the PathfindingAI by favoring the former.</p>
+<p>Therefore it finds all actions that let the player survive the next rounds by using the SearchTreeAI and
+afterwards lets the PathfindingAI check which of these is the best action to perform.</p>
+<h2 id="attributes">Attributes</h2>
+<dl>
+<dt><strong><code>player</code></strong></dt>
+<dd>The player associated with this AI.</dd>
+</dl>
+<p>Creates a new object of the SearchTreePathfindingAI.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>player</code></strong></dt>
+<dd>The player assigned to the AI.</dd>
+<dt><strong><code>max_speed</code></strong></dt>
+<dd>The maximum speed the AI can reach.</dd>
+<dt><strong><code>count_paths_to_check</code></strong></dt>
+<dd>The number of paths used to avoid dead ends.</dd>
+<dt><strong><code>depth</code></strong></dt>
+<dd>Number of pre-calculating actions.</dd>
+</dl>
+<p>distance_to_check:
+Distance an enemy player is allowed to be at maximum distance, so that he is taken into
+account in the calculations.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class SearchTreePathfindingAI(PathfindingAI, SearchTreeAI):
+    &#34;&#34;&#34;This AI combines the SearchTreeAI and the PathfindingAI by favoring the former.
+
+    Therefore it finds all actions that let the player survive the next rounds by using the SearchTreeAI and
+    afterwards lets the PathfindingAI check which of these is the best action to perform.
+
+    Attributes:
+        player: The player associated with this AI.
+    &#34;&#34;&#34;
+
+    def __init__(self, player: Player, max_speed: int, count_paths_to_check: int, depth: int,
+                 distance_to_check: int = 0):
+        &#34;&#34;&#34;Creates a new object of the SearchTreePathfindingAI.
+
+        Args:
+            player: The player assigned to the AI.
+            max_speed: The maximum speed the AI can reach.
+            count_paths_to_check: The number of paths used to avoid dead ends.
+            depth: Number of pre-calculating actions.
+            distance_to_check:
+                Distance an enemy player is allowed to be at maximum distance, so that he is taken into
+                account in the calculations.
+        &#34;&#34;&#34;
+        PathfindingAI.__init__(self, player, max_speed, count_paths_to_check)
+        SearchTreeAI.__init__(self, player, depth, max_speed, distance_to_check=distance_to_check)
+
+    def get_information(self) -&gt; str:
+        &#34;&#34;&#34;See base class.&#34;&#34;&#34;
+        return &#34;max_speed=&#34; + str(self._max_speed) \
+               + &#34;, count_paths_to_check=&#34; + str(self._get_count_paths_to_check()) \
+               + &#34;, depth=&#34; + str(self._get_depth()) \
+               + &#34;, distance_to_check=&#34; + str(self._get_distance_to_check())
+
+    def create_next_action(self, game: Game, return_value: Value):
+        &#34;&#34;&#34;See base class.&#34;&#34;&#34;
+        self._turn_ctr += 1
+
+        surviving_actions = self.create_all_next_surviving_actions(game)
+        if surviving_actions is not None and len(surviving_actions) &gt; 0:
+            return_value.value = choice(surviving_actions).get_index()
+            return_value.value = self.find_actions_by_best_path_connection(surviving_actions, game)[0][0].get_index()
+        else:
+            surviving_pathfinding_actions = self.find_actions_by_best_path_connection(
+                self.find_surviving_actions(GameService(game), 1), game)
+            return_value.value = surviving_pathfinding_actions[0][0].get_index() \
+                if surviving_pathfinding_actions is not None and len(surviving_pathfinding_actions) &gt; 0 \
+                else Action.get_default().get_index()</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="chillow.service.ai.pathfinding_ai.PathfindingAI" href="pathfinding_ai.html#chillow.service.ai.pathfinding_ai.PathfindingAI">PathfindingAI</a></li>
+<li><a title="chillow.service.ai.not_killing_itself_ai.NotKillingItselfAI" href="not_killing_itself_ai.html#chillow.service.ai.not_killing_itself_ai.NotKillingItselfAI">NotKillingItselfAI</a></li>
+<li><a title="chillow.service.ai.search_tree_ai.SearchTreeAI" href="search_tree_ai.html#chillow.service.ai.search_tree_ai.SearchTreeAI">SearchTreeAI</a></li>
+<li><a title="chillow.service.ai.artificial_intelligence.ArtificialIntelligence" href="artificial_intelligence.html#chillow.service.ai.artificial_intelligence.ArtificialIntelligence">ArtificialIntelligence</a></li>
+</ul>
+<h3>Inherited members</h3>
+<ul class="hlist">
+<li><code><b><a title="chillow.service.ai.pathfinding_ai.PathfindingAI" href="pathfinding_ai.html#chillow.service.ai.pathfinding_ai.PathfindingAI">PathfindingAI</a></b></code>:
+<ul class="hlist">
+<li><code><a title="chillow.service.ai.pathfinding_ai.PathfindingAI.calc_action_with_max_distance_to_visited_cells" href="not_killing_itself_ai.html#chillow.service.ai.not_killing_itself_ai.NotKillingItselfAI.calc_action_with_max_distance_to_visited_cells">calc_action_with_max_distance_to_visited_cells</a></code></li>
+<li><code><a title="chillow.service.ai.pathfinding_ai.PathfindingAI.create_next_action" href="not_killing_itself_ai.html#chillow.service.ai.not_killing_itself_ai.NotKillingItselfAI.create_next_action">create_next_action</a></code></li>
+<li><code><a title="chillow.service.ai.pathfinding_ai.PathfindingAI.create_next_actions_ranked" href="pathfinding_ai.html#chillow.service.ai.pathfinding_ai.PathfindingAI.create_next_actions_ranked">create_next_actions_ranked</a></code></li>
+<li><code><a title="chillow.service.ai.pathfinding_ai.PathfindingAI.find_actions_by_best_path_connection" href="pathfinding_ai.html#chillow.service.ai.pathfinding_ai.PathfindingAI.find_actions_by_best_path_connection">find_actions_by_best_path_connection</a></code></li>
+<li><code><a title="chillow.service.ai.pathfinding_ai.PathfindingAI.find_surviving_actions" href="not_killing_itself_ai.html#chillow.service.ai.not_killing_itself_ai.NotKillingItselfAI.find_surviving_actions">find_surviving_actions</a></code></li>
+<li><code><a title="chillow.service.ai.pathfinding_ai.PathfindingAI.find_surviving_actions_with_best_depth" href="not_killing_itself_ai.html#chillow.service.ai.not_killing_itself_ai.NotKillingItselfAI.find_surviving_actions_with_best_depth">find_surviving_actions_with_best_depth</a></code></li>
+<li><code><a title="chillow.service.ai.pathfinding_ai.PathfindingAI.get_information" href="not_killing_itself_ai.html#chillow.service.ai.not_killing_itself_ai.NotKillingItselfAI.get_information">get_information</a></code></li>
+<li><code><a title="chillow.service.ai.pathfinding_ai.PathfindingAI.get_random_free_cells_from_playground" href="pathfinding_ai.html#chillow.service.ai.pathfinding_ai.PathfindingAI.get_random_free_cells_from_playground">get_random_free_cells_from_playground</a></code></li>
+</ul>
+</li>
+<li><code><b><a title="chillow.service.ai.search_tree_ai.SearchTreeAI" href="search_tree_ai.html#chillow.service.ai.search_tree_ai.SearchTreeAI">SearchTreeAI</a></b></code>:
+<ul class="hlist">
+<li><code><a title="chillow.service.ai.search_tree_ai.SearchTreeAI.create_all_next_surviving_actions" href="search_tree_ai.html#chillow.service.ai.search_tree_ai.SearchTreeAI.create_all_next_surviving_actions">create_all_next_surviving_actions</a></code></li>
+</ul>
+</li>
+</ul>
+</dd>
+</dl>
 </section>
 </article>
 <nav id="sidebar">
@@ -99,6 +1500,62 @@ from chillow.service.ai.search_tree_pathfinding_ai import SearchTreePathfindingA
 <li><code><a title="chillow.service.ai.search_tree_ai" href="search_tree_ai.html">chillow.service.ai.search_tree_ai</a></code></li>
 <li><code><a title="chillow.service.ai.search_tree_node" href="search_tree_node.html">chillow.service.ai.search_tree_node</a></code></li>
 <li><code><a title="chillow.service.ai.search_tree_pathfinding_ai" href="search_tree_pathfinding_ai.html">chillow.service.ai.search_tree_pathfinding_ai</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="chillow.service.ai.AIOptions" href="#chillow.service.ai.AIOptions">AIOptions</a></code></h4>
+<ul class="">
+<li><code><a title="chillow.service.ai.AIOptions.max_distance" href="#chillow.service.ai.AIOptions.max_distance">max_distance</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="chillow.service.ai.NotKillingItselfAI" href="#chillow.service.ai.NotKillingItselfAI">NotKillingItselfAI</a></code></h4>
+<ul class="">
+<li><code><a title="chillow.service.ai.NotKillingItselfAI.calc_action_with_max_distance_to_visited_cells" href="#chillow.service.ai.NotKillingItselfAI.calc_action_with_max_distance_to_visited_cells">calc_action_with_max_distance_to_visited_cells</a></code></li>
+<li><code><a title="chillow.service.ai.NotKillingItselfAI.create_next_action" href="#chillow.service.ai.NotKillingItselfAI.create_next_action">create_next_action</a></code></li>
+<li><code><a title="chillow.service.ai.NotKillingItselfAI.find_surviving_actions" href="#chillow.service.ai.NotKillingItselfAI.find_surviving_actions">find_surviving_actions</a></code></li>
+<li><code><a title="chillow.service.ai.NotKillingItselfAI.find_surviving_actions_with_best_depth" href="#chillow.service.ai.NotKillingItselfAI.find_surviving_actions_with_best_depth">find_surviving_actions_with_best_depth</a></code></li>
+<li><code><a title="chillow.service.ai.NotKillingItselfAI.get_information" href="#chillow.service.ai.NotKillingItselfAI.get_information">get_information</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="chillow.service.ai.PathfindingAI" href="#chillow.service.ai.PathfindingAI">PathfindingAI</a></code></h4>
+<ul class="">
+<li><code><a title="chillow.service.ai.PathfindingAI.create_next_actions_ranked" href="#chillow.service.ai.PathfindingAI.create_next_actions_ranked">create_next_actions_ranked</a></code></li>
+<li><code><a title="chillow.service.ai.PathfindingAI.find_actions_by_best_path_connection" href="#chillow.service.ai.PathfindingAI.find_actions_by_best_path_connection">find_actions_by_best_path_connection</a></code></li>
+<li><code><a title="chillow.service.ai.PathfindingAI.get_random_free_cells_from_playground" href="#chillow.service.ai.PathfindingAI.get_random_free_cells_from_playground">get_random_free_cells_from_playground</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="chillow.service.ai.PathfindingSearchTreeAI" href="#chillow.service.ai.PathfindingSearchTreeAI">PathfindingSearchTreeAI</a></code></h4>
+<ul class="">
+<li><code><a title="chillow.service.ai.PathfindingSearchTreeAI.get_best_action" href="#chillow.service.ai.PathfindingSearchTreeAI.get_best_action">get_best_action</a></code></li>
+<li><code><a title="chillow.service.ai.PathfindingSearchTreeAI.set_best_action" href="#chillow.service.ai.PathfindingSearchTreeAI.set_best_action">set_best_action</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="chillow.service.ai.RandomAI" href="#chillow.service.ai.RandomAI">RandomAI</a></code></h4>
+<ul class="">
+<li><code><a title="chillow.service.ai.RandomAI.create_next_action" href="#chillow.service.ai.RandomAI.create_next_action">create_next_action</a></code></li>
+<li><code><a title="chillow.service.ai.RandomAI.get_information" href="#chillow.service.ai.RandomAI.get_information">get_information</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="chillow.service.ai.RandomWaitingAI" href="#chillow.service.ai.RandomWaitingAI">RandomWaitingAI</a></code></h4>
+</li>
+<li>
+<h4><code><a title="chillow.service.ai.SearchTreeAI" href="#chillow.service.ai.SearchTreeAI">SearchTreeAI</a></code></h4>
+<ul class="">
+<li><code><a title="chillow.service.ai.SearchTreeAI.create_all_next_surviving_actions" href="#chillow.service.ai.SearchTreeAI.create_all_next_surviving_actions">create_all_next_surviving_actions</a></code></li>
+<li><code><a title="chillow.service.ai.SearchTreeAI.create_next_action" href="#chillow.service.ai.SearchTreeAI.create_next_action">create_next_action</a></code></li>
+<li><code><a title="chillow.service.ai.SearchTreeAI.get_information" href="#chillow.service.ai.SearchTreeAI.get_information">get_information</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="chillow.service.ai.SearchTreePathfindingAI" href="#chillow.service.ai.SearchTreePathfindingAI">SearchTreePathfindingAI</a></code></h4>
+</li>
 </ul>
 </li>
 </ul>

@@ -28,9 +28,9 @@
 </summary>
 <pre><code class="python">import sys
 import time
-import pygame
 
 from chillow.model.action import Action
+from chillow.model.cell import Cell
 from chillow.model.game import Game
 from chillow.view.view import View
 
@@ -38,15 +38,20 @@ from chillow.view.view import View
 class GraphicalView(View):
     &#34;&#34;&#34;Provides a graphical UI using PyGame.&#34;&#34;&#34;
 
-    RECTANGLE_SIZE = 10
+    RECT_SIZE = 10
     CLOCK_TICK = 60
 
-    def __init__(self):
-        &#34;&#34;&#34;Creates a new graphical view.&#34;&#34;&#34;
+    def __init__(self, pygame):
+        &#34;&#34;&#34;Creates a new graphical view.
+
+        Args:
+            pygame: The PyGame library.
+        &#34;&#34;&#34;
         colors = [(255, 61, 0), (156, 204, 101), (171, 71, 188), (38, 166, 154), (255, 238, 88), (66, 165, 245)]
         super().__init__(colors)
 
-        self.__clock = pygame.time.Clock()
+        self.__pygame = pygame
+        self.__clock = self.__pygame.time.Clock()
         pygame.init()
         self.__clock.tick(self.CLOCK_TICK)
         self.__next_action = True  # Flag to wait for a KEYUP event.
@@ -64,65 +69,69 @@ class GraphicalView(View):
                 print(&#34;No winner in game.&#34;)
             else:
                 print(&#34;Winner: Player &#34; + str(player.id) + &#34; (&#34; + player.name + &#34;). Your player ID was &#34; +
-                      str(game.you.id))
+                      str(game.you.id) + &#34;.&#34;)
 
         self.__screen.fill((0, 0, 0))  # black background
         for row in range(game.height):
             for col in range(game.width):
-                pygame.draw.rect(self.__screen,
-                                 self._player_colors[game.cells[row][col].get_player_id()],
-                                 (col * self.RECTANGLE_SIZE + col,
-                                  row * self.RECTANGLE_SIZE + row,
-                                  self.RECTANGLE_SIZE,
-                                  self.RECTANGLE_SIZE))
+                self.__pygame.draw.rect(self.__screen,
+                                        self.__get_player_color(game.cells[row][col]),
+                                        (col * self.RECT_SIZE + col,
+                                         row * self.RECT_SIZE + row,
+                                         self.RECT_SIZE,
+                                         self.RECT_SIZE))
                 if game.cells[row][col].get_player_id() != 0:
                     player = game.get_player_by_id(game.cells[row][col].get_player_id())
                     if player.x == col and player.y == row:  # print head
                         border_width = 2
                         if player == game.you:
                             border_width = 4  # head of the own player has a smaller dot
-                        pygame.draw.rect(self.__screen,
-                                         self._player_colors[0],
-                                         (col * self.RECTANGLE_SIZE + col + border_width,
-                                          row * self.RECTANGLE_SIZE + row + border_width,
-                                          self.RECTANGLE_SIZE - (2 * border_width),
-                                          self.RECTANGLE_SIZE - (2 * border_width)))
-        pygame.display.update()
+                        self.__pygame.draw.rect(self.__screen,
+                                                self._player_colors[0],
+                                                (col * self.RECT_SIZE + col + border_width,
+                                                 row * self.RECT_SIZE + row + border_width,
+                                                 self.RECT_SIZE - (2 * border_width),
+                                                 self.RECT_SIZE - (2 * border_width)))
+        self.__pygame.display.update()
         self.__clock.tick(60)
 
-    def read_next_action(self) -&gt; Action:
+    def __get_player_color(self, cell: Cell):
+        return self._player_colors[cell.get_player_id()]
+
+    def read_next_action(self) -&gt; Action:  # noqa: C901
         &#34;&#34;&#34;See base class.&#34;&#34;&#34;
         while True:
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:  # Allows to close the pygame-window
+            for event in self.__pygame.event.get():
+                if event.type == self.__pygame.QUIT:  # Allows to close the pygame-window
                     self.end()
-                elif event.type == pygame.KEYDOWN:
-                    pressed_key = pygame.key.get_pressed()
+                    return Action.get_default()
+                elif event.type == self.__pygame.KEYDOWN:
+                    pressed_key = self.__pygame.key.get_pressed()
                     self.__next_action = False
-                    if pressed_key[pygame.K_UP]:
+                    if pressed_key[self.__pygame.K_UP]:
                         return Action.speed_up
-                    elif pressed_key[pygame.K_DOWN]:
+                    elif pressed_key[self.__pygame.K_DOWN]:
                         return Action.slow_down
-                    elif pressed_key[pygame.K_RIGHT]:
+                    elif pressed_key[self.__pygame.K_RIGHT]:
                         return Action.turn_right
-                    elif pressed_key[pygame.K_LEFT]:
+                    elif pressed_key[self.__pygame.K_LEFT]:
                         return Action.turn_left
-                    elif pressed_key[pygame.K_SPACE]:
+                    elif pressed_key[self.__pygame.K_SPACE]:
                         return Action.change_nothing
-                elif event.type == pygame.KEYUP:
+                elif event.type == self.__pygame.KEYUP:
                     self.__next_action = True
 
     def end(self):
         &#34;&#34;&#34;See base class.&#34;&#34;&#34;
         time.sleep(10)
-        pygame.display.quit()
-        pygame.quit()
+        self.__pygame.display.quit()
+        self.__pygame.quit()
         sys.exit()
 
     def _initialize_interface(self, game: Game):
         super()._initialize_interface(game)
-        self.__screen = pygame.display.set_mode(
-            [game.width * self.RECTANGLE_SIZE + game.width, game.height * self.RECTANGLE_SIZE + game.height])</code></pre>
+        self.__screen = self.__pygame.display.set_mode(
+            [game.width * self.RECT_SIZE + game.width, game.height * self.RECT_SIZE + game.height])</code></pre>
 </details>
 </section>
 <section>
@@ -136,10 +145,16 @@ class GraphicalView(View):
 <dl>
 <dt id="chillow.view.graphical_view.GraphicalView"><code class="flex name class">
 <span>class <span class="ident">GraphicalView</span></span>
+<span>(</span><span>pygame)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Provides a graphical UI using PyGame.</p>
-<p>Creates a new graphical view.</p></div>
+<p>Creates a new graphical view.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>pygame</code></strong></dt>
+<dd>The PyGame library.</dd>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -147,15 +162,20 @@ class GraphicalView(View):
 <pre><code class="python">class GraphicalView(View):
     &#34;&#34;&#34;Provides a graphical UI using PyGame.&#34;&#34;&#34;
 
-    RECTANGLE_SIZE = 10
+    RECT_SIZE = 10
     CLOCK_TICK = 60
 
-    def __init__(self):
-        &#34;&#34;&#34;Creates a new graphical view.&#34;&#34;&#34;
+    def __init__(self, pygame):
+        &#34;&#34;&#34;Creates a new graphical view.
+
+        Args:
+            pygame: The PyGame library.
+        &#34;&#34;&#34;
         colors = [(255, 61, 0), (156, 204, 101), (171, 71, 188), (38, 166, 154), (255, 238, 88), (66, 165, 245)]
         super().__init__(colors)
 
-        self.__clock = pygame.time.Clock()
+        self.__pygame = pygame
+        self.__clock = self.__pygame.time.Clock()
         pygame.init()
         self.__clock.tick(self.CLOCK_TICK)
         self.__next_action = True  # Flag to wait for a KEYUP event.
@@ -173,65 +193,69 @@ class GraphicalView(View):
                 print(&#34;No winner in game.&#34;)
             else:
                 print(&#34;Winner: Player &#34; + str(player.id) + &#34; (&#34; + player.name + &#34;). Your player ID was &#34; +
-                      str(game.you.id))
+                      str(game.you.id) + &#34;.&#34;)
 
         self.__screen.fill((0, 0, 0))  # black background
         for row in range(game.height):
             for col in range(game.width):
-                pygame.draw.rect(self.__screen,
-                                 self._player_colors[game.cells[row][col].get_player_id()],
-                                 (col * self.RECTANGLE_SIZE + col,
-                                  row * self.RECTANGLE_SIZE + row,
-                                  self.RECTANGLE_SIZE,
-                                  self.RECTANGLE_SIZE))
+                self.__pygame.draw.rect(self.__screen,
+                                        self.__get_player_color(game.cells[row][col]),
+                                        (col * self.RECT_SIZE + col,
+                                         row * self.RECT_SIZE + row,
+                                         self.RECT_SIZE,
+                                         self.RECT_SIZE))
                 if game.cells[row][col].get_player_id() != 0:
                     player = game.get_player_by_id(game.cells[row][col].get_player_id())
                     if player.x == col and player.y == row:  # print head
                         border_width = 2
                         if player == game.you:
                             border_width = 4  # head of the own player has a smaller dot
-                        pygame.draw.rect(self.__screen,
-                                         self._player_colors[0],
-                                         (col * self.RECTANGLE_SIZE + col + border_width,
-                                          row * self.RECTANGLE_SIZE + row + border_width,
-                                          self.RECTANGLE_SIZE - (2 * border_width),
-                                          self.RECTANGLE_SIZE - (2 * border_width)))
-        pygame.display.update()
+                        self.__pygame.draw.rect(self.__screen,
+                                                self._player_colors[0],
+                                                (col * self.RECT_SIZE + col + border_width,
+                                                 row * self.RECT_SIZE + row + border_width,
+                                                 self.RECT_SIZE - (2 * border_width),
+                                                 self.RECT_SIZE - (2 * border_width)))
+        self.__pygame.display.update()
         self.__clock.tick(60)
 
-    def read_next_action(self) -&gt; Action:
+    def __get_player_color(self, cell: Cell):
+        return self._player_colors[cell.get_player_id()]
+
+    def read_next_action(self) -&gt; Action:  # noqa: C901
         &#34;&#34;&#34;See base class.&#34;&#34;&#34;
         while True:
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:  # Allows to close the pygame-window
+            for event in self.__pygame.event.get():
+                if event.type == self.__pygame.QUIT:  # Allows to close the pygame-window
                     self.end()
-                elif event.type == pygame.KEYDOWN:
-                    pressed_key = pygame.key.get_pressed()
+                    return Action.get_default()
+                elif event.type == self.__pygame.KEYDOWN:
+                    pressed_key = self.__pygame.key.get_pressed()
                     self.__next_action = False
-                    if pressed_key[pygame.K_UP]:
+                    if pressed_key[self.__pygame.K_UP]:
                         return Action.speed_up
-                    elif pressed_key[pygame.K_DOWN]:
+                    elif pressed_key[self.__pygame.K_DOWN]:
                         return Action.slow_down
-                    elif pressed_key[pygame.K_RIGHT]:
+                    elif pressed_key[self.__pygame.K_RIGHT]:
                         return Action.turn_right
-                    elif pressed_key[pygame.K_LEFT]:
+                    elif pressed_key[self.__pygame.K_LEFT]:
                         return Action.turn_left
-                    elif pressed_key[pygame.K_SPACE]:
+                    elif pressed_key[self.__pygame.K_SPACE]:
                         return Action.change_nothing
-                elif event.type == pygame.KEYUP:
+                elif event.type == self.__pygame.KEYUP:
                     self.__next_action = True
 
     def end(self):
         &#34;&#34;&#34;See base class.&#34;&#34;&#34;
         time.sleep(10)
-        pygame.display.quit()
-        pygame.quit()
+        self.__pygame.display.quit()
+        self.__pygame.quit()
         sys.exit()
 
     def _initialize_interface(self, game: Game):
         super()._initialize_interface(game)
-        self.__screen = pygame.display.set_mode(
-            [game.width * self.RECTANGLE_SIZE + game.width, game.height * self.RECTANGLE_SIZE + game.height])</code></pre>
+        self.__screen = self.__pygame.display.set_mode(
+            [game.width * self.RECT_SIZE + game.width, game.height * self.RECT_SIZE + game.height])</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
@@ -243,7 +267,7 @@ class GraphicalView(View):
 <dd>
 <div class="desc"></div>
 </dd>
-<dt id="chillow.view.graphical_view.GraphicalView.RECTANGLE_SIZE"><code class="name">var <span class="ident">RECTANGLE_SIZE</span></code></dt>
+<dt id="chillow.view.graphical_view.GraphicalView.RECT_SIZE"><code class="name">var <span class="ident">RECT_SIZE</span></code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
@@ -262,8 +286,8 @@ class GraphicalView(View):
 <pre><code class="python">def end(self):
     &#34;&#34;&#34;See base class.&#34;&#34;&#34;
     time.sleep(10)
-    pygame.display.quit()
-    pygame.quit()
+    self.__pygame.display.quit()
+    self.__pygame.quit()
     sys.exit()</code></pre>
 </details>
 </dd>
@@ -276,26 +300,27 @@ class GraphicalView(View):
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def read_next_action(self) -&gt; Action:
+<pre><code class="python">def read_next_action(self) -&gt; Action:  # noqa: C901
     &#34;&#34;&#34;See base class.&#34;&#34;&#34;
     while True:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:  # Allows to close the pygame-window
+        for event in self.__pygame.event.get():
+            if event.type == self.__pygame.QUIT:  # Allows to close the pygame-window
                 self.end()
-            elif event.type == pygame.KEYDOWN:
-                pressed_key = pygame.key.get_pressed()
+                return Action.get_default()
+            elif event.type == self.__pygame.KEYDOWN:
+                pressed_key = self.__pygame.key.get_pressed()
                 self.__next_action = False
-                if pressed_key[pygame.K_UP]:
+                if pressed_key[self.__pygame.K_UP]:
                     return Action.speed_up
-                elif pressed_key[pygame.K_DOWN]:
+                elif pressed_key[self.__pygame.K_DOWN]:
                     return Action.slow_down
-                elif pressed_key[pygame.K_RIGHT]:
+                elif pressed_key[self.__pygame.K_RIGHT]:
                     return Action.turn_right
-                elif pressed_key[pygame.K_LEFT]:
+                elif pressed_key[self.__pygame.K_LEFT]:
                     return Action.turn_left
-                elif pressed_key[pygame.K_SPACE]:
+                elif pressed_key[self.__pygame.K_SPACE]:
                     return Action.change_nothing
-            elif event.type == pygame.KEYUP:
+            elif event.type == self.__pygame.KEYUP:
                 self.__next_action = True</code></pre>
 </details>
 </dd>
@@ -319,30 +344,30 @@ class GraphicalView(View):
             print(&#34;No winner in game.&#34;)
         else:
             print(&#34;Winner: Player &#34; + str(player.id) + &#34; (&#34; + player.name + &#34;). Your player ID was &#34; +
-                  str(game.you.id))
+                  str(game.you.id) + &#34;.&#34;)
 
     self.__screen.fill((0, 0, 0))  # black background
     for row in range(game.height):
         for col in range(game.width):
-            pygame.draw.rect(self.__screen,
-                             self._player_colors[game.cells[row][col].get_player_id()],
-                             (col * self.RECTANGLE_SIZE + col,
-                              row * self.RECTANGLE_SIZE + row,
-                              self.RECTANGLE_SIZE,
-                              self.RECTANGLE_SIZE))
+            self.__pygame.draw.rect(self.__screen,
+                                    self.__get_player_color(game.cells[row][col]),
+                                    (col * self.RECT_SIZE + col,
+                                     row * self.RECT_SIZE + row,
+                                     self.RECT_SIZE,
+                                     self.RECT_SIZE))
             if game.cells[row][col].get_player_id() != 0:
                 player = game.get_player_by_id(game.cells[row][col].get_player_id())
                 if player.x == col and player.y == row:  # print head
                     border_width = 2
                     if player == game.you:
                         border_width = 4  # head of the own player has a smaller dot
-                    pygame.draw.rect(self.__screen,
-                                     self._player_colors[0],
-                                     (col * self.RECTANGLE_SIZE + col + border_width,
-                                      row * self.RECTANGLE_SIZE + row + border_width,
-                                      self.RECTANGLE_SIZE - (2 * border_width),
-                                      self.RECTANGLE_SIZE - (2 * border_width)))
-    pygame.display.update()
+                    self.__pygame.draw.rect(self.__screen,
+                                            self._player_colors[0],
+                                            (col * self.RECT_SIZE + col + border_width,
+                                             row * self.RECT_SIZE + row + border_width,
+                                             self.RECT_SIZE - (2 * border_width),
+                                             self.RECT_SIZE - (2 * border_width)))
+    self.__pygame.display.update()
     self.__clock.tick(60)</code></pre>
 </details>
 </dd>
@@ -368,7 +393,7 @@ class GraphicalView(View):
 <h4><code><a title="chillow.view.graphical_view.GraphicalView" href="#chillow.view.graphical_view.GraphicalView">GraphicalView</a></code></h4>
 <ul class="">
 <li><code><a title="chillow.view.graphical_view.GraphicalView.CLOCK_TICK" href="#chillow.view.graphical_view.GraphicalView.CLOCK_TICK">CLOCK_TICK</a></code></li>
-<li><code><a title="chillow.view.graphical_view.GraphicalView.RECTANGLE_SIZE" href="#chillow.view.graphical_view.GraphicalView.RECTANGLE_SIZE">RECTANGLE_SIZE</a></code></li>
+<li><code><a title="chillow.view.graphical_view.GraphicalView.RECT_SIZE" href="#chillow.view.graphical_view.GraphicalView.RECT_SIZE">RECT_SIZE</a></code></li>
 <li><code><a title="chillow.view.graphical_view.GraphicalView.end" href="#chillow.view.graphical_view.GraphicalView.end">end</a></code></li>
 <li><code><a title="chillow.view.graphical_view.GraphicalView.read_next_action" href="#chillow.view.graphical_view.GraphicalView.read_next_action">read_next_action</a></code></li>
 <li><code><a title="chillow.view.graphical_view.GraphicalView.update" href="#chillow.view.graphical_view.GraphicalView.update">update</a></code></li>
